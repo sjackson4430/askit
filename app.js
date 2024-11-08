@@ -4,7 +4,7 @@ document.getElementById('askButton').addEventListener('click', async () => {
     responseElement.innerHTML = 'Thinking...';
 
     try {
-        const response = await fetch('/ask', {
+        const response = await fetch('https://askitbackend-production.up.railway.app/ask', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
