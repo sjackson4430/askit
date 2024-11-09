@@ -119,9 +119,19 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('scroll', () => {
         const parallaxElements = document.querySelectorAll('.parallax');
         parallaxElements.forEach(element => {
-            const scrolled = window.pageYOffset;
-            const rate = scrolled * 0.5;
-            element.style.transform = `translateY(${rate}px)`;
+            if (element.classList.contains('hero')) {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * 0.5;
+                // Limit the transform to prevent overlap
+                const maxTransform = element.offsetHeight * 0.3; // Adjust this value as needed
+                const limitedRate = Math.min(rate, maxTransform);
+                element.style.transform = `translateY(${limitedRate}px)`;
+            } else {
+                // Handle other parallax elements normally
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * 0.5;
+                element.style.transform = `translateY(${rate}px)`;
+            }
         });
     });
 
