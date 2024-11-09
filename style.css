@@ -1,9 +1,9 @@
 /* Add these new root variables and styles at the beginning of your file */
 :root {
     --primary-color: #00ff9d;
-    --background-color: #1a1a1a;
+    --background-color: #998c8c;
     --text-color: #ffffff;
-    --accent-color: #2d2d2d;
+    --accent-color: #34dc16;
     --error-color: #ff4444;
   }
   
