@@ -1,35 +1,35 @@
 {
-    "name": "askit",
-    "version": "1.0.0",
-    "private": true,
-    "dependencies": {
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
-        "react-scripts": "^5.0.1",
-        "axios": "^0.24.0"  // Added axios for making HTTP requests
-    },
-    "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
-        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",  // Added lint script
-        "format": "prettier --write ."  // Added format script
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    },
-    "devDependencies": {
-        "eslint": "^7.32.0",  // Added ESLint for linting
-        "prettier": "^2.3.2"  // Added Prettier for code formatting
-    }
+  "name": "askit",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+      "react": "^18.3.1",
+      "react-dom": "^18.3.1",
+      "react-scripts": "^5.0.1",
+      "axios": "^0.24.0"
+  },
+  "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject",
+      "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+      "format": "prettier --write ."
+  },
+  "browserslist": {
+      "production": [
+          ">0.2%",
+          "not dead",
+          "not op_mini all"
+      ],
+      "development": [
+          "last 1 chrome version",
+          "last 1 firefox version",
+          "last 1 safari version"
+      ]
+  },
+  "devDependencies": {
+      "eslint": "^7.32.0",
+      "prettier": "^2.3.2"
+  }
 }
