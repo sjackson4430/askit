@@ -12,8 +12,7 @@ document.getElementById('askButton').addEventListener('click', async (event) => 
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Origin': 'https://sjackson4430.github.io',
-                'Access-Control-Allow-Credentials': 'true'
+                'Origin': 'https://sjackson4430.github.io'
             },
             credentials: 'include',
             body: JSON.stringify({ question })
@@ -25,9 +24,9 @@ document.getElementById('askButton').addEventListener('click', async (event) => 
         const data = await response.json();
         responseElement.innerHTML = data.answer;
     } catch (error) {
-        console.error('Error:', error); // This will help with debugging
+        console.error('Error:', error);
         responseElement.innerHTML = 'Error: Could not get a response. ' + error.message;
     } finally {
-        button.disabled = false;  // Re-enable button regardless of outcome
+        button.disabled = false;
     }
 });
