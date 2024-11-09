@@ -14,7 +14,7 @@ jobs:
       - name: Set up static files
         run: |
           mkdir -p static
-          mv app.html static/
+          mv index.html static/
           mv login.html static/
           mv *.js static/
           mv *.css static/

@@ -31,7 +31,7 @@ def index():
 @app.route('/app')
 def serve_app():
     """Serve the main application"""
-    return send_file('static/app.html')
+    return send_file('static/index.html')
 
 @app.route('/health', methods=['GET'])
 def health_check():
