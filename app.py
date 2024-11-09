@@ -20,8 +20,16 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Environment variables for configuration
 PORT = int(os.environ.get('PORT', 5000))
-IP_API_URL = 'https://api.ipify.org'
-REQUEST_TIMEOUT = 5  # seconds
+IP_API_URL = os.environ.get('IP_API_URL', 'https://api.ipify.org')
+REQUEST_TIMEOUT = int(os.environ.get('REQUEST_TIMEOUT', 5))
+
+@app.route('/')
+def index():
+    """Default route"""
+    return jsonify({
+        'message': 'Welcome to the AI Computer Help API',
+        'endpoints': ['/health', '/get-ip']
+    })
 
 @app.route('/health', methods=['GET'])
 def health_check():
