@@ -7,17 +7,10 @@
     --error-color: #ff4444;
   }
   
-  /* Replace your existing body styles */
-  body {
-    background-color: var(--background-color);
-    color: var(--text-color);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+/* Add this at the top of your style.css file */
+body {
+    background-color: #1a1a1a !important;
+}
   
   /* Replace your existing container styles */
   .container {
