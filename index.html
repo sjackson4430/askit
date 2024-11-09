@@ -25,8 +25,10 @@
         <div class="container">
             <div class="features">
                 <button class="feature-btn active" data-feature="chat">Chat AI</button>
-                <button class="feature-btn" data-feature="diagnostics">System Diagnostics</button>
+                <button class="feature-btn" data-feature="diagnostics">System Info</button>
                 <button class="feature-btn" data-feature="tips">Quick Tips</button>
+                <button class="feature-btn" data-feature="tools">Tools</button>
+                <button class="feature-btn" data-feature="security">Security</button>
             </div>
 
             <div class="feature-content" id="chat-section">
@@ -44,6 +46,39 @@
                 <h2>Quick Computer Tips</h2>
                 <div class="tips-carousel" id="tips-carousel">
                     <!-- Tips will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="feature-content hidden" id="tools-section">
+                <h2>Computer Tools</h2>
+                <div class="tools-grid">
+                    <div class="tool-item">
+                        <h3>Network Speed Test</h3>
+                        <button id="speedTestBtn" class="tool-btn">Run Test</button>
+                        <div id="speedResult"></div>
+                    </div>
+                    <div class="tool-item">
+                        <h3>Memory Usage</h3>
+                        <div id="memoryUsage"></div>
+                    </div>
+                    <div class="tool-item">
+                        <h3>CPU Load</h3>
+                        <div id="cpuLoad"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-content hidden" id="security-section">
+                <h2>Security Check</h2>
+                <div class="security-checks">
+                    <div class="security-item">
+                        <h3>Browser Security</h3>
+                        <div id="browserSecurity"></div>
+                    </div>
+                    <div class="security-item">
+                        <h3>Connection Status</h3>
+                        <div id="connectionStatus"></div>
+                    </div>
                 </div>
             </div>
         </div>

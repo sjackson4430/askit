@@ -142,4 +142,112 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 20);
 
     document.getElementById('response-time').textContent = '0.8s';
+
+    // Enhanced System Information
+    function getDetailedSystemInfo() {
+        const systemInfo = {
+            // Browser Information
+            browser: {
+                userAgent: navigator.userAgent,
+                appName: navigator.appName,
+                appVersion: navigator.appVersion,
+                platform: navigator.platform,
+                vendor: navigator.vendor,
+                language: navigator.language,
+            },
+            // Screen Information
+            screen: {
+                width: window.screen.width,
+                height: window.screen.height,
+                colorDepth: window.screen.colorDepth,
+                pixelDepth: window.screen.pixelDepth,
+                orientation: screen.orientation.type,
+            },
+            // Connection Information
+            connection: {
+                online: navigator.onLine,
+                connectionType: navigator.connection ? navigator.connection.effectiveType : 'unknown',
+                downlink: navigator.connection ? navigator.connection.downlink : 'unknown',
+            },
+            // Hardware Information
+            hardware: {
+                deviceMemory: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'unknown',
+                hardwareConcurrency: navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} cores` : 'unknown',
+                maxTouchPoints: navigator.maxTouchPoints,
+            },
+            // Feature Support
+            features: {
+                cookies: navigator.cookieEnabled,
+                localStorage: !!window.localStorage,
+                serviceWorker: 'serviceWorker' in navigator,
+                webGL: !!window.WebGLRenderingContext,
+            }
+        };
+
+        const formatSystemInfo = (info, level = 0) => {
+            let html = '';
+            for (const [key, value] of Object.entries(info)) {
+                if (typeof value === 'object' && value !== null) {
+                    html += `<div class="info-section">
+                        <h${level + 3}>${key.charAt(0).toUpperCase() + key.slice(1)}</h${level + 3}>
+                        ${formatSystemInfo(value, level + 1)}
+                    </div>`;
+                } else {
+                    html += `<p><strong>${key}:</strong> ${value}</p>`;
+                }
+            }
+            return html;
+        };
+
+        document.getElementById('system-info').innerHTML = formatSystemInfo(systemInfo);
+    }
+
+    // Security Checks
+    function performSecurityChecks() {
+        const browserSecurity = document.getElementById('browserSecurity');
+        const connectionStatus = document.getElementById('connectionStatus');
+
+        // Browser Security Checks
+        const securityChecks = {
+            https: window.location.protocol === 'https:',
+            cookies: navigator.cookieEnabled,
+            localStorage: !!window.localStorage,
+            sessionStorage: !!window.sessionStorage,
+            privateMode: !window.indexedDB
+        };
+
+        browserSecurity.innerHTML = `
+            <ul>
+                <li class="${securityChecks.https ? 'secure' : 'insecure'}">
+                    HTTPS Connection: ${securityChecks.https ? 'Secure' : 'Insecure'}
+                </li>
+                <li class="${securityChecks.cookies ? 'secure' : 'insecure'}">
+                    Cookies: ${securityChecks.cookies ? 'Enabled' : 'Disabled'}
+                </li>
+                <li class="${securityChecks.localStorage ? 'secure' : 'insecure'}">
+                    Local Storage: ${securityChecks.localStorage ? 'Enabled' : 'Disabled'}
+                </li>
+                <li class="${securityChecks.sessionStorage ? 'secure' : 'insecure'}">
+                    Session Storage: ${securityChecks.sessionStorage ? 'Enabled' : 'Disabled'}
+                </li>
+                <li class="${securityChecks.privateMode ? 'secure' : 'insecure'}">
+                    Private Mode: ${securityChecks.privateMode ? 'Enabled' : 'Disabled'}
+                </li>
+            </ul>
+        `;
+
+        connectionStatus.innerHTML = `
+            <ul>
+                <li class="${navigator.onLine ? 'online' : 'offline'}">
+                    Connection Status: ${navigator.onLine ? 'Online' : 'Offline'}
+                </li>
+                <li class="${navigator.connection ? navigator.connection.effectiveType : 'unknown'}">
+                    Connection Type: ${navigator.connection ? navigator.connection.effectiveType : 'Unknown'}
+                </li>
+                <li class="${navigator.connection ? navigator.connection.downlink : 'unknown'}">
+                    Downlink: ${navigator.connection ? navigator.connection.downlink : 'Unknown'}
+                </li>
+            </ul>
+        `;
+    }
 });
