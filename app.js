@@ -11,7 +11,12 @@ document.getElementById('askButton').addEventListener('click', async (event) => 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+<<<<<<< HEAD
                 'Accept': 'application/json'
+=======
+                'Accept': 'application/json',
+                'Origin': 'https://sjackson4430.github.io'
+>>>>>>> b375bf85d020dbe9ddddbb311ac2295e0895ff9c
             },
             // Remove credentials and Origin header as they might be causing CORS issues
             body: JSON.stringify({ question })
@@ -23,6 +28,7 @@ document.getElementById('askButton').addEventListener('click', async (event) => 
             throw new Error(`Rate limit exceeded. Please try again later. ${data.retryAfter ? 
                 `Retry after ${Math.ceil(data.retryAfter)} seconds.` : 
                 'Please wait a while before trying again.'}`);
+<<<<<<< HEAD
         }
 
         // Handle other errors
@@ -30,6 +36,15 @@ document.getElementById('askButton').addEventListener('click', async (event) => 
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+=======
+        }
+
+        // Handle other errors
+        if (!response.ok) {
+            throw new Error(`Request failed with status: ${response.status}`);
+        }
+
+>>>>>>> b375bf85d020dbe9ddddbb311ac2295e0895ff9c
         const data = await response.json();
         
         // Check if data has an error property
