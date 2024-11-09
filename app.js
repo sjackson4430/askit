@@ -52,3 +52,87 @@ document.getElementById('askButton').addEventListener('click', async (event) => 
         button.disabled = false;
     }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. IP Address Display
+    fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('ip-address').textContent = `Your IP: ${data.ip}`;
+        })
+        .catch(error => console.error('Error fetching IP:', error));
+
+    // 2. Feature Tabs
+    const featureButtons = document.querySelectorAll('.feature-btn');
+    featureButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons
+            featureButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            // Hide all feature content
+            document.querySelectorAll('.feature-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            // Show selected feature content
+            const featureId = `${button.dataset.feature}-section`;
+            document.getElementById(featureId).classList.remove('hidden');
+        });
+    });
+
+    // 3. System Information
+    const systemInfo = {
+        browser: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        cookiesEnabled: navigator.cookieEnabled,
+        screenResolution: `${window.screen.width}x${window.screen.height}`
+    };
+
+    const systemInfoHtml = Object.entries(systemInfo)
+        .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+        .join('');
+    document.getElementById('system-info').innerHTML = systemInfoHtml;
+
+    // 4. Quick Tips Carousel
+    const tips = [
+        "Regularly update your operating system",
+        "Use antivirus software",
+        "Back up your data frequently",
+        "Clean your computer's vents",
+        "Use strong, unique passwords"
+    ];
+
+    const tipsCarousel = document.getElementById('tips-carousel');
+    let currentTip = 0;
+
+    function showNextTip() {
+        tipsCarousel.innerHTML = `<p class="tip">${tips[currentTip]}</p>`;
+        currentTip = (currentTip + 1) % tips.length;
+    }
+
+    showNextTip();
+    setInterval(showNextTip, 5000);
+
+    // 5. Parallax Effect
+    window.addEventListener('scroll', () => {
+        const parallaxElements = document.querySelectorAll('.parallax');
+        parallaxElements.forEach(element => {
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * 0.5;
+            element.style.transform = `translateY(${rate}px)`;
+        });
+    });
+
+    // 6. Animated Statistics
+    let userCount = 0;
+    const targetUsers = 1000;
+    const userCounter = setInterval(() => {
+        userCount += 5;
+        document.getElementById('users-count').textContent = userCount;
+        if (userCount >= targetUsers) clearInterval(userCounter);
+    }, 20);
+
+    document.getElementById('response-time').textContent = '0.8s';
+});

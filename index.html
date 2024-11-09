@@ -5,15 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Computer Help Site</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>AI Computer Help Desk</h1>
-        <textarea id="question" placeholder="Type your computer-related question here..."></textarea>
-        <button id="askButton">Ask AI</button>
-        <div id="response"></div>
-    </div>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">AI Help Desk</div>
+            <div class="ip-address" id="ip-address">Loading IP...</div>
+        </div>
+    </nav>
+
+    <section class="hero parallax">
+        <h1>Welcome to AI Computer Help</h1>
+        <p>Your 24/7 Technical Assistant</p>
+    </section>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="features">
+                <button class="feature-btn active" data-feature="chat">Chat AI</button>
+                <button class="feature-btn" data-feature="diagnostics">System Diagnostics</button>
+                <button class="feature-btn" data-feature="tips">Quick Tips</button>
+            </div>
+
+            <div class="feature-content" id="chat-section">
+                <textarea id="question" placeholder="Type your computer-related question here..."></textarea>
+                <button id="askButton">Ask AI</button>
+                <div id="response"></div>
+            </div>
+
+            <div class="feature-content hidden" id="diagnostics-section">
+                <h2>System Information</h2>
+                <div id="system-info"></div>
+            </div>
+
+            <div class="feature-content hidden" id="tips-section">
+                <h2>Quick Computer Tips</h2>
+                <div class="tips-carousel" id="tips-carousel">
+                    <!-- Tips will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats parallax">
+        <div class="stat-container">
+            <div class="stat">
+                <i class="fas fa-users"></i>
+                <span id="users-count">0</span>
+                <p>Users Helped</p>
+            </div>
+            <div class="stat">
+                <i class="fas fa-clock"></i>
+                <span id="response-time">0</span>
+                <p>Avg Response Time</p>
+            </div>
+        </div>
+    </section>
+
     <script src="app.js"></script>
 </body>
 </html>

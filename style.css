@@ -106,3 +106,126 @@ body {
     color: var(--primary-color);
     font-size: 2.5rem;
   }
+  
+  /* Add these new styles to your existing CSS */
+  
+  .navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(45, 45, 45, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+  }
+  
+  .nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+  }
+  
+  .logo {
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
+  .ip-address {
+    color: var(--text-color);
+    font-size: 0.9rem;
+  }
+  
+  .hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920');
+    background-size: cover;
+    background-attachment: fixed;
+    color: var(--text-color);
+  }
+  
+  .features {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .feature-btn {
+    flex: 1;
+    padding: 0.8rem;
+    background: var(--accent-color);
+    border: 2px solid var(--primary-color);
+    color: var(--text-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .feature-btn.active {
+    background: var(--primary-color);
+    color: var(--background-color);
+  }
+  
+  .feature-content {
+    transition: opacity 0.3s ease;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  .stats {
+    padding: 4rem 0;
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+                url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920');
+    background-size: cover;
+    background-attachment: fixed;
+  }
+  
+  .stat-container {
+    display: flex;
+    justify-content: space-around;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .stat {
+    text-align: center;
+    color: var(--text-color);
+  }
+  
+  .stat i {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+  
+  .stat span {
+    font-size: 2rem;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .tips-carousel {
+    padding: 1rem;
+    background: var(--accent-color);
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .tip {
+    margin: 0;
+    padding: 1rem;
+    animation: fadeIn 0.5s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
