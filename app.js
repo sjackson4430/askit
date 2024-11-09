@@ -1,6 +1,20 @@
 document.getElementById('askButton').addEventListener('click', async (event) => {
     const button = event.currentTarget;
     button.disabled = true;  // Disable button while processing
+
+    // Update your API calls to point to your hosted backend
+const API_URL = 'https://your-backend-url.com'; // Replace with your actual backend URL
+
+// Keep using your existing backend URL
+fetch('https://askitbackend-production.up.railway.app/ask', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': 'https://sjackson4430.github.io'
+    },
+    body: JSON.stringify({ question })
+})
     
     const question = document.getElementById('question').value;
     const responseElement = document.getElementById('response');
