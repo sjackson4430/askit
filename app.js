@@ -2,20 +2,6 @@ document.getElementById('askButton').addEventListener('click', async (event) => 
     const button = event.currentTarget;
     button.disabled = true;  // Disable button while processing
 
-    // Update your API calls to point to your hosted backend
-const API_URL = 'https://your-backend-url.com'; // Replace with your actual backend URL
-
-// Keep using your existing backend URL
-fetch('https://askitbackend-production.up.railway.app/ask', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Origin': 'https://sjackson4430.github.io'
-    },
-    body: JSON.stringify({ question })
-})
-    
     const question = document.getElementById('question').value;
     const responseElement = document.getElementById('response');
     responseElement.innerHTML = 'Thinking...';
@@ -27,19 +13,16 @@ fetch('https://askitbackend-production.up.railway.app/ask', {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Origin': 'https://sjackson4430.github.io'
-
             },
-            // Remove credentials and Origin header as they might be causing CORS issues
             body: JSON.stringify({ question })
         });
-        
+
         // Handle rate limiting
         if (response.status === 429) {
             const data = await response.json();
             throw new Error(`Rate limit exceeded. Please try again later. ${data.retryAfter ? 
                 `Retry after ${Math.ceil(data.retryAfter)} seconds.` : 
                 'Please wait a while before trying again.'}`);
-
         }
 
         // Handle other errors
