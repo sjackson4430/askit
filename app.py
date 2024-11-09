@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file, redirect
 from flask_cors import CORS
 import requests
 import logging
@@ -25,11 +25,13 @@ REQUEST_TIMEOUT = int(os.environ.get('REQUEST_TIMEOUT', 5))
 
 @app.route('/')
 def index():
-    """Default route"""
-    return jsonify({
-        'message': 'Welcome to the AI Computer Help API',
-        'endpoints': ['/health', '/get-ip']
-    })
+    """Serve the login page"""
+    return send_file('static/login.html')
+
+@app.route('/app')
+def serve_app():
+    """Serve the main application"""
+    return send_file('static/app.html')
 
 @app.route('/health', methods=['GET'])
 def health_check():

@@ -11,6 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up static files
+        run: |
+          mkdir -p static
+          mv app.html static/
+          mv login.html static/
+          mv *.js static/
+          mv *.css static/
+
       - name: Install Railway
         run: npm i -g @railway/cli
 
