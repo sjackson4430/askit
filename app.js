@@ -1,4 +1,7 @@
-document.getElementById('askButton').addEventListener('click', async () => {
+document.getElementById('askButton').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;  // Disable button while processing
+    
     const question = document.getElementById('question').value;
     const responseElement = document.getElementById('response');
     responseElement.innerHTML = 'Thinking...';
@@ -24,5 +27,7 @@ document.getElementById('askButton').addEventListener('click', async () => {
     } catch (error) {
         console.error('Error:', error); // This will help with debugging
         responseElement.innerHTML = 'Error: Could not get a response. ' + error.message;
+    } finally {
+        button.disabled = false;  // Re-enable button regardless of outcome
     }
 });
