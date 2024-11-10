@@ -6,7 +6,6 @@ async function fetchAPI(endpoint, options = {}) {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Origin': 'https://sjackson4430.github.io'
         }
     };
 
@@ -20,7 +19,8 @@ async function fetchAPI(endpoint, options = {}) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        return data;
     } catch (error) {
         console.error(`API call failed: ${error.message}`);
         throw error;
@@ -518,57 +518,57 @@ function initDNSLookup() {
     };
 }
 
+async function pingHost(hostname) {
+    try {
+        const data = await fetchAPI(`/ping?host=${encodeURIComponent(hostname)}`);
+        return data;
+    } catch (error) {
+        console.error('Ping error:', error);
+        throw error;
+    }
+}
+
 function initPingTest() {
     const pingBtn = document.getElementById('pingTestBtn');
+    const pingInput = document.getElementById('pingInput');
     const pingResult = document.getElementById('pingResult');
 
-    if (!pingBtn || !pingResult) return;
+    if (!pingBtn || !pingInput || !pingResult) return;
 
     pingBtn.onclick = async function() {
         try {
             pingBtn.disabled = true;
-            pingResult.innerHTML = '<div class="loading">Testing ping...</div>';
+            pingResult.innerHTML = '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
             
-            const hosts = ['google.com', 'cloudflare.com', 'amazon.com'];
-            let results = [];
-
-            for (const host of hosts) {
-                const startTime = performance.now();
-                try {
-                    const response = await fetch(`${API_BASE_URL}/ping?host=${encodeURIComponent(host)}`);
-                    const data = await response.json();
-                    const endTime = performance.now();
-                    
-                    results.push({
-                        host,
-                        time: Math.round(endTime - startTime),
-                        status: data.success ? 'success' : 'failed',
-                        details: data
-                    });
-                } catch (error) {
-                    results.push({
-                        host,
-                        status: 'failed',
-                        error: error.message
-                    });
-                }
+            const hostname = pingInput.value.trim();
+            if (!hostname) {
+                throw new Error('Please enter a hostname or IP');
             }
 
-            pingResult.innerHTML = `
-                <div class="ping-results">
-                    ${results.map(result => `
-                        <div class="ping-item ${result.status}">
-                            <div class="ping-host">${result.host}</div>
-                            ${result.time ? 
-                                `<div class="ping-time">${result.time}ms</div>` : 
-                                `<div class="ping-error">${result.error || 'Failed'}</div>`
-                            }
+            const result = await pingHost(hostname);
+            
+            if (result.success) {
+                pingResult.innerHTML = `
+                    <div class="ping-results">
+                        <div class="info-group">
+                            <h4>Results for ${hostname}</h4>
+                            <p>Status: <span class="success">Success</span></p>
+                            <p>Average Response Time: ${result.average_time}ms</p>
+                            <div class="ping-details">
+                                <pre class="ping-output">${result.output}</pre>
+                            </div>
                         </div>
-                    `).join('')}
+                    </div>
+                `;
+            } else {
+                throw new Error(result.error || 'Ping failed');
+            }
+        } catch (error) {
+            pingResult.innerHTML = `
+                <div class="error">
+                    <p>Error: ${error.message}</p>
                 </div>
             `;
-        } catch (error) {
-            pingResult.innerHTML = `<div class="error">${error.message}</div>`;
         } finally {
             pingBtn.disabled = false;
         }
@@ -668,9 +668,14 @@ function initNetworkInfo() {
 
 async function checkBackendConnection() {
     try {
-        const response = await fetchAPI('/health');
-        console.log('Health check response:', response);
-        return response.status === 'healthy';
+        // Try both endpoints
+        try {
+            const response = await fetchAPI('/health');
+            return response.status === 'healthy';
+        } catch {
+            const response = await fetchAPI('/');
+            return response.status === 'healthy';
+        }
     } catch (error) {
         console.error('Backend connection check failed:', error);
         return false;
@@ -687,7 +692,7 @@ function updateBackendStatus(isAvailable) {
         console.error('Backend connection failed');
     } else {
         statusEl.classList.remove('error');
-        statusEl.textContent = '';
+        statusEl.textContent = 'Backend connected';
         console.log('Backend connection successful');
     }
 }
