@@ -22,18 +22,29 @@ logging.basicConfig(
 )
 
 app = Flask(__name__)
-# Update CORS configuration to allow your GitHub Pages domain
+# Update CORS configuration to be more permissive during development
+ALLOWED_ORIGINS = [
+    'https://sjackson4430.github.io',
+    'http://localhost:5000',
+    'https://askitbackend-production.up.railway.app',
+    'http://127.0.0.1:5000'
+]
+
 CORS(app, resources={
     r"/*": {
-        "origins": [
-            "https://sjackson4430.github.io",
-            "http://localhost:5000",
-            "http://127.0.0.1:5000"
-        ],
+        "origins": ALLOWED_ORIGINS,
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
     }
 })
+
+# Add CORS headers to all responses
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 # Environment variables for configuration
 PORT = int(os.environ.get('PORT', 5000))

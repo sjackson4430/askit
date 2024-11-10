@@ -1,5 +1,31 @@
 const API_BASE_URL = 'http://localhost:5000'; // Change this to your actual backend URL when deployed
 
+async function fetchAPI(endpoint, options = {}) {
+    const defaultOptions = {
+        mode: 'cors',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+    };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...defaultOptions,
+            ...options,
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(`API call failed: ${error.message}`);
+        throw error;
+    }
+}
+
 document.getElementById('askButton').addEventListener('click', async (event) => {
     const button = event.currentTarget;
     button.disabled = true;  // Disable button while processing
@@ -456,24 +482,14 @@ function initDNSLookup() {
     dnsBtn.onclick = async function() {
         try {
             dnsBtn.disabled = true;
-            dnsResult.innerHTML = '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+            dnsResult.innerHTML = '<div class="loading">Looking up DNS records...</div>';
             
             const domain = dnsInput.value.trim();
             if (!domain) {
                 throw new Error('Please enter a domain name');
             }
 
-            const response = await fetch(`${API_BASE_URL}/dns-lookup?domain=${encodeURIComponent(domain)}`, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await fetchAPI(`/dns-lookup?domain=${encodeURIComponent(domain)}`);
             
             if (data.error) {
                 throw new Error(data.error);
@@ -650,10 +666,14 @@ function initNetworkInfo() {
     };
 }
 
-function checkBackendConnection() {
-    return fetch(`${API_BASE_URL}/health`)
-        .then(response => response.ok)
-        .catch(() => false);
+async function checkBackendConnection() {
+    try {
+        const response = await fetchAPI('/health');
+        return response.status === 'healthy';
+    } catch (error) {
+        console.error('Backend connection check failed:', error);
+        return false;
+    }
 }
 
 function updateBackendStatus(isAvailable) {
