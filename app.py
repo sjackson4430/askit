@@ -5,6 +5,11 @@ import logging
 from datetime import datetime
 import os
 from io import BytesIO
+import socket
+import dns.resolver
+import platform
+import psutil
+import subprocess
 
 # Configure logging
 logging.basicConfig(
@@ -123,6 +128,92 @@ def speed_test_file(size):
         as_attachment=True,
         download_name=f'speedtest-{size}.dat'
     )
+
+@app.route('/dns-lookup')
+def dns_lookup():
+    domain = request.args.get('domain')
+    if not domain:
+        return jsonify({'error': 'Domain name is required'}), 400
+
+    try:
+        # Get IP address
+        ip = socket.gethostbyname(domain)
+        
+        # Get DNS records
+        records = {}
+        for record_type in ['A', 'AAAA', 'MX', 'NS', 'TXT']:
+            try:
+                answers = dns.resolver.resolve(domain, record_type)
+                records[record_type] = [str(rdata) for rdata in answers]
+            except Exception:
+                continue
+
+        return jsonify({
+            'ip': ip,
+            'records': records
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/ping')
+def ping_host():
+    host = request.args.get('host')
+    if not host:
+        return jsonify({'error': 'Host is required'}), 400
+
+    try:
+        # Using ping command
+        param = '-n' if platform.system().lower() == 'windows' else '-c'
+        command = ['ping', param, '1', host]
+        output = subprocess.check_output(command).decode()
+        return jsonify({'success': True, 'output': output})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/system-info')
+def system_info():
+    try:
+        return jsonify({
+            'platform': platform.platform(),
+            'osType': platform.system(),
+            'cpuCores': psutil.cpu_count(),
+            'memory': f"{psutil.virtual_memory().total / (1024**3):.2f} GB",
+            'diskSpace': f"{psutil.disk_usage('/').total / (1024**3):.2f} GB"
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/network-info')
+def network_info():
+    try:
+        # Get public IP using ipify
+        ip_response = requests.get('https://api.ipify.org?format=json')
+        public_ip = ip_response.json()['ip']
+        
+        # Get ISP info using ip-api
+        isp_response = requests.get(f'http://ip-api.com/json/{public_ip}')
+        isp_data = isp_response.json()
+        
+        return jsonify({
+            'publicIp': public_ip,
+            'isp': isp_data.get('isp', 'Unknown'),
+            'location': f"{isp_data.get('city', 'Unknown')}, {isp_data.get('country', 'Unknown')}",
+            'latency': ping_latency()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def ping_latency():
+    """Helper function to measure latency to 8.8.8.8"""
+    try:
+        param = '-n' if platform.system().lower() == 'windows' else '-c'
+        command = ['ping', param, '1', '8.8.8.8']
+        output = subprocess.check_output(command).decode()
+        if 'time=' in output:
+            return float(output.split('time=')[1].split()[0])
+        return 0
+    except:
+        return 0
 
 if __name__ == '__main__':
     try:

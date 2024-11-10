@@ -318,6 +318,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize speed test
     initSpeedTest();
+
+    // DNS Lookup Tool
+    initDNSLookup();
+
+    // Ping Test
+    initPingTest();
+
+    // System Information Tool
+    initSystemInfo();
+
+    // Network Information Tool
+    initNetworkInfo();
 });
 
 function initSpeedTest() {
@@ -331,34 +343,31 @@ function initSpeedTest() {
         speedTestBtn.textContent = 'Testing...';
         
         try {
-            // Initialize test UI
+            // Initialize UI
             speedResult.innerHTML = `
                 <div class="speed-gauge">
                     <div class="gauge-value">0</div>
                     <div class="gauge-label">Mbps</div>
-                    <div class="gauge-meter">
-                        <div class="meter-fill"></div>
-                    </div>
+                    <div class="gauge-meter"><div class="meter-fill"></div></div>
                 </div>
                 <div class="test-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill"></div>
-                    </div>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
                     <div class="progress-label">Preparing test...</div>
                 </div>
             `;
 
-            const gaugeValue = speedResult.querySelector('.gauge-value');
-            const meterFill = speedResult.querySelector('.meter-fill');
-            const progressFill = speedResult.querySelector('.progress-fill');
-            const progressLabel = speedResult.querySelector('.progress-label');
+            const elements = {
+                gauge: speedResult.querySelector('.gauge-value'),
+                meter: speedResult.querySelector('.meter-fill'),
+                progress: speedResult.querySelector('.progress-fill'),
+                label: speedResult.querySelector('.progress-label')
+            };
 
-            // Larger test files with weighted importance
+            // Much larger test files
             const testSizes = [
-                { size: 'small', weight: 1, bytes: 1024 * 1024 },      // 1MB
-                { size: 'medium', weight: 2, bytes: 5 * 1024 * 1024 }, // 5MB
-                { size: 'large', weight: 3, bytes: 10 * 1024 * 1024 }, // 10MB
-                { size: 'xlarge', weight: 4, bytes: 20 * 1024 * 1024 } // 20MB
+                { size: 'medium', weight: 1, bytes: 25 * 1024 * 1024 },  // 25MB
+                { size: 'large', weight: 2, bytes: 50 * 1024 * 1024 },   // 50MB
+                { size: 'xlarge', weight: 3, bytes: 100 * 1024 * 1024 }  // 100MB
             ];
 
             let totalSpeed = 0;
@@ -366,12 +375,11 @@ function initSpeedTest() {
             let maxSpeed = 0;
 
             for (let i = 0; i < testSizes.length; i++) {
-                const { size, weight, bytes } = testSizes[i];
-                const progress = ((i / testSizes.length) * 100).toFixed(0);
-                progressFill.style.width = `${progress}%`;
-                progressLabel.textContent = `Testing ${size} file... (${progress}%)`;
+                const { size, weight } = testSizes[i];
+                elements.progress.style.width = `${((i + 1) / testSizes.length * 100)}%`;
+                elements.label.textContent = `Testing ${size} file... (${((i + 1) / testSizes.length * 100).toFixed(0)}%)`;
 
-                // Perform multiple samples for each size
+                // Multiple samples per size
                 const samples = 3;
                 let sizeSpeed = 0;
 
@@ -383,39 +391,35 @@ function initSpeedTest() {
                     const blob = await response.blob();
                     const endTime = performance.now();
 
-                    const fileSizeInBits = blob.size * 8;
-                    const durationInSeconds = (endTime - startTime) / 1000;
-                    const speedMbps = (fileSizeInBits / durationInSeconds / 1024 / 1024);
-                    
+                    const speedMbps = (blob.size * 8) / ((endTime - startTime) / 1000) / 1024 / 1024;
                     sizeSpeed += speedMbps;
                     maxSpeed = Math.max(maxSpeed, speedMbps);
+
+                    // Update gauge during test
+                    elements.gauge.textContent = speedMbps.toFixed(2);
+                    elements.meter.style.width = `${Math.min((speedMbps / 1000) * 100, 100)}%`;
                 }
 
                 const avgSpeedForSize = (sizeSpeed / samples) * weight;
                 totalSpeed += avgSpeedForSize;
                 totalWeight += weight;
-
-                const currentAvg = (totalSpeed / totalWeight).toFixed(2);
-                gaugeValue.textContent = currentAvg;
-                meterFill.style.width = `${Math.min((currentAvg / maxSpeed) * 100, 100)}%`;
             }
 
             const finalSpeed = (totalSpeed / totalWeight).toFixed(2);
             
-            // Final results display
+            // Final results
             speedResult.innerHTML = `
                 <div class="speed-results">
                     <div class="speed-gauge final">
                         <div class="gauge-value">${finalSpeed}</div>
                         <div class="gauge-label">Mbps</div>
                         <div class="gauge-meter">
-                            <div class="meter-fill" style="width: ${Math.min((finalSpeed / maxSpeed) * 100, 100)}%"></div>
+                            <div class="meter-fill" style="width: ${Math.min((finalSpeed / 1000) * 100, 100)}%"></div>
                         </div>
                     </div>
                     <div class="speed-details">
-                        <p>Average Download Speed: <strong>${finalSpeed} Mbps</strong></p>
+                        <p>Download Speed: <strong>${finalSpeed} Mbps</strong></p>
                         <p>Peak Speed: <strong>${maxSpeed.toFixed(2)} Mbps</strong></p>
-                        <p>Tests Completed: <strong>${testSizes.length * 3}</strong></p>
                         <p>Quality: <strong>${getSpeedQuality(finalSpeed)}</strong></p>
                     </div>
                 </div>
@@ -423,10 +427,7 @@ function initSpeedTest() {
         } catch (error) {
             console.error('Speed test error:', error);
             speedResult.innerHTML = `
-                <div class="error">
-                    Failed to complete speed test. Please try again.
-                    <br>Error: ${error.message}
-                </div>
+                <div class="error">Failed to complete speed test: ${error.message}</div>
             `;
         } finally {
             speedTestBtn.disabled = false;
@@ -442,3 +443,192 @@ function getSpeedQuality(speed) {
     if (speed >= 10) return 'Fair';
     return 'Poor';
 }
+
+function initDNSLookup() {
+    const dnsBtn = document.getElementById('dnsLookupBtn');
+    const dnsInput = document.getElementById('dnsInput');
+    const dnsResult = document.getElementById('dnsResult');
+
+    if (!dnsBtn || !dnsInput || !dnsResult) return;
+
+    dnsBtn.onclick = async function() {
+        try {
+            dnsBtn.disabled = true;
+            dnsResult.innerHTML = '<div class="loading">Looking up DNS...</div>';
+            
+            const domain = dnsInput.value.trim();
+            const response = await fetch(`/dns-lookup?domain=${encodeURIComponent(domain)}`);
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(data.error || 'DNS lookup failed');
+
+            dnsResult.innerHTML = `
+                <div class="dns-results">
+                    <p><strong>IP Address:</strong> ${data.ip}</p>
+                    ${data.records ? `<p><strong>DNS Records:</strong></p>
+                    <pre>${JSON.stringify(data.records, null, 2)}</pre>` : ''}
+                </div>
+            `;
+        } catch (error) {
+            dnsResult.innerHTML = `<div class="error">${error.message}</div>`;
+        } finally {
+            dnsBtn.disabled = false;
+        }
+    };
+}
+
+function initPingTest() {
+    const pingBtn = document.getElementById('pingTestBtn');
+    const pingResult = document.getElementById('pingResult');
+
+    if (!pingBtn || !pingResult) return;
+
+    pingBtn.onclick = async function() {
+        try {
+            pingBtn.disabled = true;
+            pingResult.innerHTML = '<div class="loading">Testing ping...</div>';
+            
+            const hosts = ['google.com', 'cloudflare.com', 'amazon.com'];
+            let results = [];
+
+            for (const host of hosts) {
+                const startTime = performance.now();
+                try {
+                    const response = await fetch(`/ping?host=${encodeURIComponent(host)}`);
+                    const data = await response.json();
+                    const endTime = performance.now();
+                    
+                    results.push({
+                        host,
+                        time: Math.round(endTime - startTime),
+                        status: data.success ? 'success' : 'failed',
+                        details: data
+                    });
+                } catch (error) {
+                    results.push({
+                        host,
+                        status: 'failed',
+                        error: error.message
+                    });
+                }
+            }
+
+            pingResult.innerHTML = `
+                <div class="ping-results">
+                    ${results.map(result => `
+                        <div class="ping-item ${result.status}">
+                            <div class="ping-host">${result.host}</div>
+                            ${result.time ? 
+                                `<div class="ping-time">${result.time}ms</div>` : 
+                                `<div class="ping-error">${result.error || 'Failed'}</div>`
+                            }
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } catch (error) {
+            pingResult.innerHTML = `<div class="error">${error.message}</div>`;
+        } finally {
+            pingBtn.disabled = false;
+        }
+    };
+}
+
+function initSystemInfo() {
+    const sysInfoBtn = document.getElementById('sysInfoBtn');
+    const sysInfoResult = document.getElementById('sysInfoResult');
+
+    if (!sysInfoBtn || !sysInfoResult) return;
+
+    sysInfoBtn.onclick = async function() {
+        try {
+            sysInfoBtn.disabled = true;
+            sysInfoResult.innerHTML = '<div class="loading">Gathering system information...</div>';
+
+            const response = await fetch('/system-info');
+            const data = await response.json();
+
+            sysInfoResult.innerHTML = `
+                <div class="system-info">
+                    <div class="info-group">
+                        <h4>Browser Information</h4>
+                        <p>Name: ${navigator.userAgent.split(') ')[0].split(' (')[0]}</p>
+                        <p>Platform: ${navigator.platform}</p>
+                        <p>Language: ${navigator.language}</p>
+                        <p>Cookies Enabled: ${navigator.cookieEnabled ? 'Yes' : 'No'}</p>
+                    </div>
+                    <div class="info-group">
+                        <h4>Screen Information</h4>
+                        <p>Resolution: ${window.screen.width}x${window.screen.height}</p>
+                        <p>Color Depth: ${window.screen.colorDepth}-bit</p>
+                        <p>Pixel Ratio: ${window.devicePixelRatio}</p>
+                    </div>
+                    <div class="info-group">
+                        <h4>System Resources</h4>
+                        <p>Memory: ${data.memory}</p>
+                        <p>CPU Cores: ${data.cpuCores}</p>
+                        <p>OS Type: ${data.osType}</p>
+                        <p>Platform: ${data.platform}</p>
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            sysInfoResult.innerHTML = `<div class="error">${error.message}</div>`;
+        } finally {
+            sysInfoBtn.disabled = false;
+        }
+    };
+}
+
+function initNetworkInfo() {
+    const netInfoBtn = document.getElementById('netInfoBtn');
+    const netInfoResult = document.getElementById('netInfoResult');
+
+    if (!netInfoBtn || !netInfoResult) return;
+
+    netInfoBtn.onclick = async function() {
+        try {
+            netInfoBtn.disabled = true;
+            netInfoResult.innerHTML = '<div class="loading">Checking network...</div>';
+
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            const response = await fetch('/network-info');
+            const data = await response.json();
+
+            netInfoResult.innerHTML = `
+                <div class="network-info">
+                    <div class="info-group">
+                        <h4>Connection Type</h4>
+                        <p>Type: ${connection ? connection.effectiveType : 'Unknown'}</p>
+                        <p>Downlink: ${connection ? connection.downlink + ' Mbps' : 'Unknown'}</p>
+                        <p>RTT: ${connection ? connection.rtt + ' ms' : 'Unknown'}</p>
+                    </div>
+                    <div class="info-group">
+                        <h4>Network Details</h4>
+                        <p>Public IP: ${data.publicIp}</p>
+                        <p>ISP: ${data.isp}</p>
+                        <p>Location: ${data.location}</p>
+                    </div>
+                    <div class="info-group">
+                        <h4>Connection Status</h4>
+                        <p>Status: ${navigator.onLine ? 'Online' : 'Offline'}</p>
+                        <p>Protocol: ${window.location.protocol}</p>
+                        <p>Latency: ${data.latency}ms</p>
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            netInfoResult.innerHTML = `<div class="error">${error.message}</div>`;
+        } finally {
+            netInfoBtn.disabled = false;
+        }
+    };
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initSpeedTest();
+    initDNSLookup();
+    initPingTest();
+    initSystemInfo();
+    initNetworkInfo();
+});

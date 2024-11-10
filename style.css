@@ -370,3 +370,45 @@ h1 {
     margin-top: 0.5rem;
     text-align: center;
 }
+
+/* Add these new styles for the tools */
+.ping-results, .system-info, .network-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--surface-color);
+    border-radius: 8px;
+}
+
+.ping-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.ping-item.success .ping-time {
+    color: var(--success-color);
+}
+
+.ping-item.failed .ping-error {
+    color: var(--error-color);
+}
+
+.info-group {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.info-group h4 {
+    color: var(--primary-color);
+    margin: 0 0 0.5rem 0;
+}
+
+.info-group p {
+    margin: 0.25rem 0;
+    color: var(--text-color);
+}
