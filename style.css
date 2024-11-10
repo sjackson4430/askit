@@ -244,6 +244,8 @@ h1 {
   background: rgba(45, 45, 45, 0.9);
   backdrop-filter: blur(10px);
   z-index: 1000;
+  transform: translateZ(0); /* Forces hardware acceleration */
+  will-change: transform; /* Hints at animation */
 }
 
 .nav-content

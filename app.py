@@ -4,6 +4,7 @@ import requests
 import logging
 from datetime import datetime
 import os
+from io import BytesIO
 
 # Configure logging
 logging.basicConfig(
@@ -102,6 +103,25 @@ def server_error(e):
         'error': 'Internal server error',
         'success': False
     }), 500
+
+@app.route('/speed-test-file/<size>')
+def speed_test_file(size):
+    """Generate test files of different sizes"""
+    sizes = {
+        'small': 1024 * 100,  # 100KB
+        'medium': 1024 * 500,  # 500KB
+        'large': 1024 * 1000   # 1MB
+    }
+    
+    byte_size = sizes.get(size, sizes['small'])
+    test_data = b'0' * byte_size
+    
+    return send_file(
+        BytesIO(test_data),
+        mimetype='application/octet-stream',
+        as_attachment=True,
+        download_name=f'speedtest-{size}.dat'
+    )
 
 if __name__ == '__main__':
     try:

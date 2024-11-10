@@ -335,7 +335,6 @@ function initSpeedTest() {
         speedTestBtn.textContent = 'Testing...';
         
         try {
-            // Show loading animation
             speedResult.innerHTML = `
                 <div class="loading">
                     <div class="dot"></div>
@@ -344,10 +343,11 @@ function initSpeedTest() {
                 </div>
             `;
 
-            // Perform multiple tests with different file sizes
+            // Test files from our backend
             const testFiles = [
-                'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png', // Small file
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1280px-Image_created_with_a_mobile_phone.png' // Larger file
+                '/speed-test-file/small',
+                '/speed-test-file/medium',
+                '/speed-test-file/large'
             ];
 
             let totalSpeed = 0;
@@ -355,7 +355,9 @@ function initSpeedTest() {
 
             for (const fileUrl of testFiles) {
                 const startTime = performance.now();
-                const response = await fetch(fileUrl + '?t=' + new Date().getTime()); // Prevent caching
+                const response = await fetch(fileUrl + '?t=' + new Date().getTime(), {
+                    cache: 'no-store'
+                });
                 const blob = await response.blob();
                 const endTime = performance.now();
 
@@ -371,7 +373,6 @@ function initSpeedTest() {
 
             const averageSpeed = totalSpeed / completedTests;
 
-            // Display results
             speedResult.innerHTML = `
                 <div class="speed-results">
                     <p>Average Download Speed: <strong>${averageSpeed.toFixed(2)} Mbps</strong></p>
