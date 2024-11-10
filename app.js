@@ -1,3 +1,5 @@
+const API_BASE_URL = 'http://localhost:5000'; // Change this to your actual backend URL when deployed
+
 document.getElementById('askButton').addEventListener('click', async (event) => {
     const button = event.currentTarget;
     button.disabled = true;  // Disable button while processing
@@ -461,7 +463,7 @@ function initDNSLookup() {
                 throw new Error('Please enter a domain name');
             }
 
-            const response = await fetch(`/dns-lookup?domain=${encodeURIComponent(domain)}`, {
+            const response = await fetch(`${API_BASE_URL}/dns-lookup?domain=${encodeURIComponent(domain)}`, {
                 headers: {
                     'Accept': 'application/json'
                 }
@@ -517,7 +519,7 @@ function initPingTest() {
             for (const host of hosts) {
                 const startTime = performance.now();
                 try {
-                    const response = await fetch(`/ping?host=${encodeURIComponent(host)}`);
+                    const response = await fetch(`${API_BASE_URL}/ping?host=${encodeURIComponent(host)}`);
                     const data = await response.json();
                     const endTime = performance.now();
                     
@@ -568,7 +570,7 @@ function initSystemInfo() {
             sysInfoBtn.disabled = true;
             sysInfoResult.innerHTML = '<div class="loading">Gathering system information...</div>';
 
-            const response = await fetch('/system-info');
+            const response = await fetch(`${API_BASE_URL}/system-info`);
             const data = await response.json();
 
             sysInfoResult.innerHTML = `
@@ -615,7 +617,7 @@ function initNetworkInfo() {
             netInfoResult.innerHTML = '<div class="loading">Checking network...</div>';
 
             const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            const response = await fetch('/network-info');
+            const response = await fetch(`${API_BASE_URL}/network-info`);
             const data = await response.json();
 
             netInfoResult.innerHTML = `
@@ -648,10 +650,40 @@ function initNetworkInfo() {
     };
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+function checkBackendConnection() {
+    return fetch(`${API_BASE_URL}/health`)
+        .then(response => response.ok)
+        .catch(() => false);
+}
+
+function updateBackendStatus(isAvailable) {
+    const statusEl = document.getElementById('backend-status');
+    if (!isAvailable) {
+        statusEl.classList.add('error');
+        statusEl.textContent = 'Backend services unavailable';
+    } else {
+        statusEl.classList.remove('error');
+        statusEl.textContent = '';
+    }
+}
+
+async function initTools() {
+    const backendAvailable = await checkBackendConnection();
+    updateBackendStatus(backendAvailable);
+    if (!backendAvailable) {
+        console.error('Backend server is not available');
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.disabled = true;
+            btn.title = 'Service temporarily unavailable';
+        });
+        return;
+    }
+
     initSpeedTest();
     initDNSLookup();
     initPingTest();
     initSystemInfo();
     initNetworkInfo();
-});
+}
+
+document.addEventListener('DOMContentLoaded', initTools);

@@ -457,3 +457,20 @@ h1 {
     border-radius: 50%;
     animation: bounce 0.5s infinite alternate;
 }
+
+.backend-status {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    z-index: 1000;
+    display: none;
+}
+
+.backend-status.error {
+    display: block;
+    background-color: var(--error-color);
+    color: white;
+}
