@@ -4,31 +4,37 @@ import os
 
 app = Flask(__name__)
 
-# Get port from Railway or use default
-port = int(os.environ.get('PORT', 5000))
-
 # Get allowed origins from environment or use default
-allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'https://sjackson4430.github.io').split(',')
+ALLOWED_ORIGINS = ['https://sjackson4430.github.io']
 
-# Update CORS configuration
+# Update CORS configuration to be more specific
 CORS(app, resources={
     r"/*": {
-        "origins": allowed_origins,
+        "origins": ALLOWED_ORIGINS,
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
-        "supports_credentials": True
+        "supports_credentials": False
     }
 })
 
 @app.after_request
 def after_request(response):
     origin = request.headers.get('Origin')
-    if origin in allowed_origins:
-        response.headers.add('Access-Control-Allow-Origin', origin)
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
+    if origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept'
     return response
 
+@app.route('/health')
+def health_check():
+    return jsonify({
+        'status': 'healthy',
+        'message': 'API is running'
+    })
+
+# Your other routes here...
+
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)

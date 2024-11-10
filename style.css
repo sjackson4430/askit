@@ -474,3 +474,9 @@ h1 {
     background-color: var(--error-color);
     color: white;
 }
+
+.parallax {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}

@@ -7,7 +7,6 @@ async function fetchAPI(endpoint, options = {}) {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         },
-        credentials: 'include'  // Add this for cookies if needed
     };
 
     try {
@@ -483,7 +482,7 @@ function initDNSLookup() {
     dnsBtn.onclick = async function() {
         try {
             dnsBtn.disabled = true;
-            dnsResult.innerHTML = '<div class="loading">Looking up DNS records...</div>';
+            dnsResult.innerHTML = '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
             
             const domain = dnsInput.value.trim();
             if (!domain) {
@@ -500,7 +499,7 @@ function initDNSLookup() {
                 <div class="dns-results">
                     <div class="info-group">
                         <h4>IP Address</h4>
-                        <p>${data.ip}</p>
+                        <p>${data.ip || 'Not found'}</p>
                     </div>
                     ${Object.entries(data.records || {}).map(([type, records]) => `
                         <div class="info-group">
@@ -670,7 +669,7 @@ function initNetworkInfo() {
 async function checkBackendConnection() {
     try {
         const response = await fetchAPI('/health');
-        console.log('Backend health check:', response);
+        console.log('Backend health check response:', response);
         return response.status === 'healthy';
     } catch (error) {
         console.error('Backend connection check failed:', error);
