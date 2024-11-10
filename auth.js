@@ -1,4 +1,3 @@
-// Update the AuthManager class
 class AuthManager {
     constructor() {
         this.isAuthenticated = false;
@@ -19,19 +18,40 @@ class AuthManager {
             this.currentUser = JSON.parse(user);
             this.isAuthenticated = true;
             
-            // Update path check and redirect
-            if (window.location.pathname === '/' || window.location.pathname === '/login.html') {
-                window.location.href = '/app';
+            if (window.location.pathname.includes('login.html')) {
+                window.location.href = '/index.html';
+            } else {
+                this.updateUserInterface();
             }
-        } else if (window.location.pathname !== '/' && window.location.pathname !== '/login.html') {
+        } else if (!window.location.pathname.includes('login.html')) {
             // If not authenticated and not on login page, redirect to login
-            window.location.href = '/';
+            window.location.href = '/login.html';
         }
 
-        this.setupEventListeners();
+        // Render Google Sign-In button if on login page
+        if (window.location.pathname.includes('login.html')) {
+            google.accounts.id.renderButton(
+                document.getElementById('googleBtn'),
+                { theme: 'filled_blue', size: 'large', width: '100%' }
+            );
+        }
     }
 
-    async handleGoogleSignIn(response) {
+    updateUserInterface() {
+        const userInfo = document.querySelector('.user-info');
+        const userEmail = document.getElementById('userEmail');
+        const userAvatar = document.getElementById('userAvatar');
+        
+        if (this.currentUser && userInfo) {
+            userInfo.style.display = 'flex';
+            userEmail.textContent = this.currentUser.email;
+            userAvatar.src = this.currentUser.picture || 'default-avatar.png';
+        } else if (userInfo) {
+            userInfo.style.display = 'none';
+        }
+    }
+
+    handleGoogleSignIn(response) {
         try {
             const decoded = JSON.parse(atob(response.credential.split('.')[1]));
             
@@ -46,21 +66,20 @@ class AuthManager {
             this.currentUser = user;
             this.isAuthenticated = true;
             
-            // Update redirect path
-            window.location.href = '/app';
+            window.location.href = '/index.html';
         } catch (error) {
             console.error('Google sign-in error:', error);
             alert('Google sign-in failed. Please try again.');
         }
     }
 
-    // ... rest of your AuthManager methods ...
-
     logout() {
         localStorage.removeItem('user');
         this.currentUser = null;
         this.isAuthenticated = false;
-        // Update redirect path
-        window.location.href = '/';
+        window.location.href = '/login.html';
     }
-} 
+}
+
+// Initialize auth manager
+const auth = new AuthManager();

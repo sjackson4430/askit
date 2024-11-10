@@ -417,3 +417,12 @@ body {
 .logout-btn:hover {
     opacity: 0.9;
 }
+
+/* Add these styles for auth states */
+.user-info {
+    display: none; /* Hidden by default */
+}
+
+.user-info.authenticated {
+    display: flex; /* Show when authenticated */
+}
