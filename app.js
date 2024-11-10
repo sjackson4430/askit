@@ -315,4 +315,81 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error('Speed test button not found!'); // Debug log
     }
+
+    // Initialize speed test
+    initSpeedTest();
 });
+
+function initSpeedTest() {
+    const speedTestBtn = document.getElementById('speedTestBtn');
+    const speedResult = document.getElementById('speedResult');
+
+    if (!speedTestBtn || !speedResult) {
+        console.error('Speed test elements not found');
+        return;
+    }
+
+    speedTestBtn.onclick = async function() {
+        console.log('Speed test started');
+        speedTestBtn.disabled = true;
+        speedTestBtn.textContent = 'Testing...';
+        
+        try {
+            // Show loading animation
+            speedResult.innerHTML = `
+                <div class="loading">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            `;
+
+            // Perform multiple tests with different file sizes
+            const testFiles = [
+                'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png', // Small file
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1280px-Image_created_with_a_mobile_phone.png' // Larger file
+            ];
+
+            let totalSpeed = 0;
+            let completedTests = 0;
+
+            for (const fileUrl of testFiles) {
+                const startTime = performance.now();
+                const response = await fetch(fileUrl + '?t=' + new Date().getTime()); // Prevent caching
+                const blob = await response.blob();
+                const endTime = performance.now();
+
+                const fileSizeInBits = blob.size * 8;
+                const durationInSeconds = (endTime - startTime) / 1000;
+                const speedMbps = (fileSizeInBits / durationInSeconds / 1024 / 1024);
+                
+                totalSpeed += speedMbps;
+                completedTests++;
+
+                console.log(`Test ${completedTests}: ${speedMbps.toFixed(2)} Mbps`);
+            }
+
+            const averageSpeed = totalSpeed / completedTests;
+
+            // Display results
+            speedResult.innerHTML = `
+                <div class="speed-results">
+                    <p>Average Download Speed: <strong>${averageSpeed.toFixed(2)} Mbps</strong></p>
+                    <p>Tests Completed: <strong>${completedTests}</strong></p>
+                </div>
+            `;
+
+        } catch (error) {
+            console.error('Speed test error:', error);
+            speedResult.innerHTML = `
+                <div class="error">
+                    Failed to complete speed test. Please try again.
+                    <br>Error: ${error.message}
+                </div>
+            `;
+        } finally {
+            speedTestBtn.disabled = false;
+            speedTestBtn.textContent = 'Run Test';
+        }
+    };
+}
