@@ -3,31 +3,41 @@ class AuthManager {
         this.isAuthenticated = false;
         this.currentUser = null;
         this.init();
-        this.setupEventListeners();
     }
 
     init() {
+        // Check if we're on the login page
+        const isLoginPage = window.location.pathname.includes('login.html');
+        
         // Check if user is already logged in
         const user = localStorage.getItem('user');
+        
         if (user) {
             this.currentUser = JSON.parse(user);
             this.isAuthenticated = true;
             
-            if (window.location.pathname.includes('login.html')) {
-                window.location.href = '/index.html';
+            if (isLoginPage) {
+                window.location.href = 'index.html';
             }
-        } else if (!window.location.pathname.includes('login.html')) {
-            // If not authenticated and not on login page, redirect to login
-            window.location.href = '/login.html';
+        } else {
+            // Not authenticated
+            if (!isLoginPage) {
+                // Redirect to login if not on login page
+                window.location.href = 'login.html';
+                return;
+            }
         }
 
-        // Initialize Google Sign-In
-        google.accounts.id.initialize({
-            client_id: 'YOUR_GOOGLE_CLIENT_ID',
-            callback: this.handleGoogleSignIn.bind(this)
-        });
+        // Only set up event listeners if we're on the login page
+        if (isLoginPage) {
+            this.setupEventListeners();
+            
+            // Initialize Google Sign-In
+            google.accounts.id.initialize({
+                client_id: 'YOUR_GOOGLE_CLIENT_ID',
+                callback: this.handleGoogleSignIn.bind(this)
+            });
 
-        if (window.location.pathname.includes('login.html')) {
             google.accounts.id.renderButton(
                 document.getElementById('googleBtn'),
                 { theme: 'filled_blue', size: 'large', width: '100%' }
@@ -36,12 +46,12 @@ class AuthManager {
     }
 
     setupEventListeners() {
-        // Toggle between login and register forms
+        const loginBox = document.getElementById('loginBox');
+        const registerBox = document.getElementById('registerBox');
         const toggleRegister = document.getElementById('toggleRegister');
         const toggleLogin = document.getElementById('toggleLogin');
-        const loginBox = document.querySelector('.auth-box:not(#registerBox)');
-        const registerBox = document.getElementById('registerBox');
 
+        // Toggle between login and register forms
         if (toggleRegister) {
             toggleRegister.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -58,21 +68,20 @@ class AuthManager {
             });
         }
 
-        // Handle registration form submission
-        const registerForm = document.getElementById('registerForm');
-        if (registerForm) {
-            registerForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleRegistration();
-            });
-        }
-
-        // Handle login form submission
+        // Handle form submissions
         const loginForm = document.getElementById('loginForm');
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.handleLogin();
+            });
+        }
+
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleRegistration();
             });
         }
     }

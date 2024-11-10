@@ -449,6 +449,7 @@ body {
     max-width: 400px;
     text-align: center;
     backdrop-filter: blur(10px);
+    position: relative;
 }
 
 .auth-box h1 {
@@ -546,5 +547,5 @@ body {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
