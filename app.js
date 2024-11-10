@@ -87,6 +87,27 @@ async function pingHost(hostname) {
     }
 }
 
+// Check both backends' health
+async function checkBackendConnections() {
+    try {
+        // Check AI backend
+        console.log('Checking AI backend...');
+        const aiHealth = await fetchAIAPI('/health');
+        console.log('AI Backend health:', aiHealth);
+        
+        // Check Tools backend
+        console.log('Checking Tools backend...');
+        const toolsHealth = await fetchToolsAPI('/health');
+        console.log('Tools Backend health:', toolsHealth);
+
+        // Return true if both backends are healthy
+        return aiHealth.status === 'healthy' && toolsHealth.status === 'healthy';
+    } catch (error) {
+        console.error('Backend connection check failed:', error);
+        return false;
+    }
+}
+
 // Update the ask button event listener
 document.getElementById('askButton').addEventListener('click', async (event) => {
     const button = event.currentTarget;
@@ -111,7 +132,7 @@ document.getElementById('askButton').addEventListener('click', async (event) => 
     }
 });
 
-// Initialize network tools
+// Network Tools Initialization
 function initNetworkTools() {
     initDNSLookup();
     initPingTest();
@@ -119,12 +140,6 @@ function initNetworkTools() {
     initNetworkInfo();
 }
 
-// Call initialization when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    initNetworkTools();
-});
-
-// Update other network tool functions to use fetchToolsAPI
 function initDNSLookup() {
     const dnsBtn = document.getElementById('dnsLookupBtn');
     const dnsInput = document.getElementById('dnsInput');
@@ -228,8 +243,7 @@ function initSystemInfo() {
             sysInfoBtn.disabled = true;
             sysInfoResult.innerHTML = '<div class="loading">Gathering system information...</div>';
 
-            const response = await fetchToolsAPI('/system-info');
-            const data = await response.json();
+            const data = await fetchToolsAPI('/system-info');
 
             sysInfoResult.innerHTML = `
                 <div class="system-info">
@@ -275,8 +289,7 @@ function initNetworkInfo() {
             netInfoResult.innerHTML = '<div class="loading">Checking network...</div>';
 
             const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            const response = await fetchToolsAPI('/network-info');
-            const data = await response.json();
+            const data = await fetchToolsAPI('/network-info');
 
             netInfoResult.innerHTML = `
                 <div class="network-info">
@@ -306,37 +319,6 @@ function initNetworkInfo() {
             netInfoBtn.disabled = false;
         }
     };
-}
-
-// Add this function to check both backends
-async function checkBackendConnections() {
-    try {
-        // Check AI backend
-        const aiHealth = await fetchAIAPI('/health');
-        console.log('AI Backend health:', aiHealth);
-        
-        // Check Tools backend
-        const toolsHealth = await fetch('https://network-tools-backend-production.up.railway.app/health', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            mode: 'cors'
-        });
-        
-        if (!toolsHealth.ok) {
-            throw new Error(`Tools backend HTTP error! status: ${toolsHealth.status}`);
-        }
-        
-        const toolsHealthData = await toolsHealth.json();
-        console.log('Tools Backend health:', toolsHealthData);
-
-        // Return true if both backends are healthy
-        return aiHealth.status === 'healthy' && toolsHealthData.status === 'healthy';
-    } catch (error) {
-        console.error('Backend connection check failed:', error);
-        return false;
-    }
 }
 
 function updateBackendStatus(isAvailable) {
@@ -372,7 +354,7 @@ async function initTools() {
     initNetworkTools();
 }
 
-// Add this CSS for the status display
+// Add styles
 const styles = `
     #backend-status {
         padding: 0.5rem;
