@@ -308,16 +308,31 @@ function initNetworkInfo() {
     };
 }
 
-async function checkBackendConnection() {
+// Add this function to check both backends
+async function checkBackendConnections() {
     try {
-        // Try both endpoints
-        try {
-            const response = await fetchToolsAPI('/health');
-            return response.status === 'healthy';
-        } catch {
-            const response = await fetchToolsAPI('/');
-            return response.status === 'healthy';
+        // Check AI backend
+        const aiHealth = await fetchAIAPI('/health');
+        console.log('AI Backend health:', aiHealth);
+        
+        // Check Tools backend
+        const toolsHealth = await fetch('https://network-tools-backend-production.up.railway.app/health', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            mode: 'cors'
+        });
+        
+        if (!toolsHealth.ok) {
+            throw new Error(`Tools backend HTTP error! status: ${toolsHealth.status}`);
         }
+        
+        const toolsHealthData = await toolsHealth.json();
+        console.log('Tools Backend health:', toolsHealthData);
+
+        // Return true if both backends are healthy
+        return aiHealth.status === 'healthy' && toolsHealthData.status === 'healthy';
     } catch (error) {
         console.error('Backend connection check failed:', error);
         return false;
@@ -334,18 +349,18 @@ function updateBackendStatus(isAvailable) {
         console.error('Backend connection failed');
     } else {
         statusEl.classList.remove('error');
-        statusEl.textContent = 'Backend connected';
+        statusEl.textContent = 'Backend services connected';
         console.log('Backend connection successful');
     }
 }
 
 async function initTools() {
-    console.log('Checking backend connection...');
-    const backendAvailable = await checkBackendConnection();
-    updateBackendStatus(backendAvailable);
+    console.log('Checking backend connections...');
+    const backendsAvailable = await checkBackendConnections();
+    updateBackendStatus(backendsAvailable);
 
-    if (!backendAvailable) {
-        console.error('Backend server is not available');
+    if (!backendsAvailable) {
+        console.error('One or more backend servers are not available');
         document.querySelectorAll('.tool-btn').forEach(btn => {
             btn.disabled = true;
             btn.title = 'Service temporarily unavailable';
@@ -353,12 +368,30 @@ async function initTools() {
         return;
     }
 
-    console.log('Backend available, initializing tools...');
-    initSpeedTest();
-    initDNSLookup();
-    initPingTest();
-    initSystemInfo();
-    initNetworkInfo();
+    console.log('Backends available, initializing tools...');
+    initNetworkTools();
 }
 
+// Add this CSS for the status display
+const styles = `
+    #backend-status {
+        padding: 0.5rem;
+        margin: 1rem 0;
+        text-align: center;
+        border-radius: 4px;
+    }
+
+    #backend-status.error {
+        background: rgba(255, 0, 0, 0.1);
+        color: #ff0000;
+        border: 1px solid #ff0000;
+    }
+`;
+
+// Add styles to document
+const styleSheet = document.createElement("style");
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
+
+// Initialize when the page loads
 document.addEventListener('DOMContentLoaded', initTools);
