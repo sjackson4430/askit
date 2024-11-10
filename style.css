@@ -304,3 +304,34 @@ h1 {
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+.tool-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.tool-btn {
+    width: auto !important;
+    padding: 0.5rem 1rem !important;
+    margin: 1rem 0 !important;
+    background: var(--primary-color) !important;
+    color: var(--background-color) !important;
+    border: none !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+}
+
+.tool-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error {
+    color: var(--error-color);
+    padding: 1rem;
+    margin-top: 1rem;
+    border-left: 4px solid var(--error-color);
+    background: rgba(255, 68, 68, 0.1);
+}

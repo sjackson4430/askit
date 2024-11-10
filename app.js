@@ -51,6 +51,8 @@ document.getElementById('askButton').addEventListener('click', async (event) => 
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded'); // Debug log
+
     // 1. IP Address Display
     fetch('https://api.ipify.org?format=json')
         .then(response => response.json())
@@ -255,16 +257,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const speedTestBtn = document.getElementById('speedTestBtn');
     const speedResult = document.getElementById('speedResult');
 
+    console.log('Speed Test Button:', speedTestBtn); // Debug log
+
     if (speedTestBtn) {
+        console.log('Adding click listener to speed test button'); // Debug log
+        
         speedTestBtn.addEventListener('click', async () => {
+            console.log('Speed test button clicked'); // Debug log
+            
             try {
                 speedTestBtn.disabled = true;
                 speedTestBtn.textContent = 'Testing...';
-                speedResult.innerHTML = '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+                speedResult.innerHTML = `
+                    <div class="loading">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>`;
+
+                console.log('Starting speed test'); // Debug log
 
                 // Test download speed
                 const startTime = performance.now();
                 const imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Snake_River_%285mb%29.jpg';
+                
+                console.log('Fetching test file...'); // Debug log
                 const response = await fetch(imageUrl);
                 const blob = await response.blob();
                 const endTime = performance.now();
@@ -274,6 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const durationInSeconds = (endTime - startTime) / 1000;
                 const speedInMbps = (fileSizeInBits / durationInSeconds / 1024 / 1024).toFixed(2);
 
+                console.log('Speed test completed:', speedInMbps, 'Mbps'); // Debug log
+
                 // Display results
                 speedResult.innerHTML = `
                     <div class="speed-results">
@@ -282,16 +301,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             } catch (error) {
+                console.error('Speed test error:', error); // Debug log
                 speedResult.innerHTML = `
                     <div class="error">
                         Failed to test speed. Please try again.
                     </div>
                 `;
-                console.error('Speed test error:', error);
             } finally {
                 speedTestBtn.disabled = false;
                 speedTestBtn.textContent = 'Run Test';
             }
         });
+    } else {
+        console.error('Speed test button not found!'); // Debug log
     }
 });
