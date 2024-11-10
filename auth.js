@@ -6,10 +6,7 @@ class AuthManager {
     }
 
     init() {
-        // Check if we're on the login page
         const isLoginPage = window.location.pathname.includes('login.html');
-        
-        // Check if user is already logged in
         const user = localStorage.getItem('user');
         
         if (user) {
@@ -20,19 +17,14 @@ class AuthManager {
                 window.location.href = 'index.html';
             }
         } else {
-            // Not authenticated
             if (!isLoginPage) {
-                // Redirect to login if not on login page
                 window.location.href = 'login.html';
                 return;
             }
         }
 
-        // Only set up event listeners if we're on the login page
         if (isLoginPage) {
             this.setupEventListeners();
-            
-            // Initialize Google Sign-In
             google.accounts.id.initialize({
                 client_id: 'YOUR_GOOGLE_CLIENT_ID',
                 callback: this.handleGoogleSignIn.bind(this)
@@ -51,7 +43,6 @@ class AuthManager {
         const toggleRegister = document.getElementById('toggleRegister');
         const toggleLogin = document.getElementById('toggleLogin');
 
-        // Toggle between login and register forms
         if (toggleRegister) {
             toggleRegister.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -59,7 +50,6 @@ class AuthManager {
                 registerBox.classList.remove('hidden');
             });
         }
-
         if (toggleLogin) {
             toggleLogin.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -68,7 +58,6 @@ class AuthManager {
             });
         }
 
-        // Handle form submissions
         const loginForm = document.getElementById('loginForm');
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {
@@ -97,8 +86,6 @@ class AuthManager {
             return;
         }
 
-        // Here you would typically make an API call to your backend
-        // For now, we'll just store in localStorage
         const user = {
             name,
             email,
@@ -115,8 +102,6 @@ class AuthManager {
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
 
-        // Here you would typically verify with your backend
-        // For now, we'll just check localStorage
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             const user = JSON.parse(storedUser);
@@ -161,5 +146,4 @@ class AuthManager {
     }
 }
 
-// Initialize auth manager
 const auth = new AuthManager();
