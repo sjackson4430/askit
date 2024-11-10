@@ -250,4 +250,48 @@ document.addEventListener('DOMContentLoaded', () => {
             </ul>
         `;
     }
+
+    // Network Speed Test
+    const speedTestBtn = document.getElementById('speedTestBtn');
+    const speedResult = document.getElementById('speedResult');
+
+    if (speedTestBtn) {
+        speedTestBtn.addEventListener('click', async () => {
+            try {
+                speedTestBtn.disabled = true;
+                speedTestBtn.textContent = 'Testing...';
+                speedResult.innerHTML = '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+
+                // Test download speed
+                const startTime = performance.now();
+                const imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Snake_River_%285mb%29.jpg';
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+                const endTime = performance.now();
+
+                // Calculate speed
+                const fileSizeInBits = blob.size * 8;
+                const durationInSeconds = (endTime - startTime) / 1000;
+                const speedInMbps = (fileSizeInBits / durationInSeconds / 1024 / 1024).toFixed(2);
+
+                // Display results
+                speedResult.innerHTML = `
+                    <div class="speed-results">
+                        <p>Download Speed: <strong>${speedInMbps} Mbps</strong></p>
+                        <p>Test Duration: <strong>${durationInSeconds.toFixed(2)}s</strong></p>
+                    </div>
+                `;
+            } catch (error) {
+                speedResult.innerHTML = `
+                    <div class="error">
+                        Failed to test speed. Please try again.
+                    </div>
+                `;
+                console.error('Speed test error:', error);
+            } finally {
+                speedTestBtn.disabled = false;
+                speedTestBtn.textContent = 'Run Test';
+            }
+        });
+    }
 });
