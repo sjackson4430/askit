@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000'; // Change this to your actual backend URL when deployed
+const API_BASE_URL = 'https://askitbackend-production.up.railway.app'; // Your Railway app URL
 
 async function fetchAPI(endpoint, options = {}) {
     const defaultOptions = {
@@ -7,6 +7,7 @@ async function fetchAPI(endpoint, options = {}) {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         },
+        credentials: 'include'  // Add this for cookies if needed
     };
 
     try {
@@ -669,6 +670,7 @@ function initNetworkInfo() {
 async function checkBackendConnection() {
     try {
         const response = await fetchAPI('/health');
+        console.log('Backend health check:', response);
         return response.status === 'healthy';
     } catch (error) {
         console.error('Backend connection check failed:', error);
@@ -680,7 +682,7 @@ function updateBackendStatus(isAvailable) {
     const statusEl = document.getElementById('backend-status');
     if (!isAvailable) {
         statusEl.classList.add('error');
-        statusEl.textContent = 'Backend services unavailable';
+        statusEl.textContent = 'Backend services unavailable. Please try again later.';
     } else {
         statusEl.classList.remove('error');
         statusEl.textContent = '';
@@ -688,8 +690,10 @@ function updateBackendStatus(isAvailable) {
 }
 
 async function initTools() {
+    console.log('Checking backend connection...');
     const backendAvailable = await checkBackendConnection();
     updateBackendStatus(backendAvailable);
+
     if (!backendAvailable) {
         console.error('Backend server is not available');
         document.querySelectorAll('.tool-btn').forEach(btn => {
@@ -699,6 +703,7 @@ async function initTools() {
         return;
     }
 
+    console.log('Backend available, initializing tools...');
     initSpeedTest();
     initDNSLookup();
     initPingTest();

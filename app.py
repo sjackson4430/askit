@@ -22,28 +22,30 @@ logging.basicConfig(
 )
 
 app = Flask(__name__)
-# Update CORS configuration to be more permissive during development
+# Update CORS configuration with your GitHub Pages domain
 ALLOWED_ORIGINS = [
     'https://sjackson4430.github.io',
-    'http://localhost:5000',
-    'https://askitbackend-production.up.railway.app',
-    'http://127.0.0.1:5000'
+    'https://askitbackend-production.up.railway.app'
 ]
 
 CORS(app, resources={
     r"/*": {
         "origins": ALLOWED_ORIGINS,
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+        "supports_credentials": True
     }
 })
 
 # Add CORS headers to all responses
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    origin = request.headers.get('Origin')
+    if origin in ALLOWED_ORIGINS:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
 # Environment variables for configuration
@@ -66,7 +68,7 @@ def health_check():
     """Basic health check endpoint"""
     return jsonify({
         'status': 'healthy',
-        'timestamp': datetime.now().isoformat()
+        'environment': os.environ.get('FLASK_ENV', 'production')
     })
 
 @app.route('/get-ip', methods=['GET'])
@@ -252,6 +254,17 @@ def ping_latency():
         return 0
     except:
         return 0
+
+@app.route('/debug/config')
+def debug_config():
+    if app.debug:  # Only show in development
+        return jsonify({
+            'PORT': os.environ.get('PORT'),
+            'FLASK_APP': os.environ.get('FLASK_APP'),
+            'FLASK_ENV': os.environ.get('FLASK_ENV'),
+            'ALLOWED_ORIGINS': os.environ.get('ALLOWED_ORIGINS'),
+        })
+    return jsonify({'message': 'Not available in production'})
 
 if __name__ == '__main__':
     try:
