@@ -6,7 +6,8 @@ async function fetchAPI(endpoint, options = {}) {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-        },
+            'Origin': 'https://sjackson4430.github.io'
+        }
     };
 
     try {
@@ -669,7 +670,7 @@ function initNetworkInfo() {
 async function checkBackendConnection() {
     try {
         const response = await fetchAPI('/health');
-        console.log('Backend health check response:', response);
+        console.log('Health check response:', response);
         return response.status === 'healthy';
     } catch (error) {
         console.error('Backend connection check failed:', error);
@@ -679,12 +680,16 @@ async function checkBackendConnection() {
 
 function updateBackendStatus(isAvailable) {
     const statusEl = document.getElementById('backend-status');
+    if (!statusEl) return;
+
     if (!isAvailable) {
         statusEl.classList.add('error');
-        statusEl.textContent = 'Backend services unavailable. Please try again later.';
+        statusEl.textContent = 'Backend services unavailable';
+        console.error('Backend connection failed');
     } else {
         statusEl.classList.remove('error');
         statusEl.textContent = '';
+        console.log('Backend connection successful');
     }
 }
 

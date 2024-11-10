@@ -4,36 +4,50 @@ import os
 
 app = Flask(__name__)
 
-# Get allowed origins from environment or use default
-ALLOWED_ORIGINS = ['https://sjackson4430.github.io']
-
-# Update CORS configuration to be more specific
+# CORS configuration
 CORS(app, resources={
     r"/*": {
-        "origins": ALLOWED_ORIGINS,
+        "origins": ["https://sjackson4430.github.io"],
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
-        "supports_credentials": False
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
     }
 })
 
-@app.after_request
-def after_request(response):
-    origin = request.headers.get('Origin')
-    if origin in ALLOWED_ORIGINS:
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept'
-    return response
-
+# Health check endpoint
 @app.route('/health')
 def health_check():
     return jsonify({
         'status': 'healthy',
-        'message': 'API is running'
+        'message': 'Backend is running'
     })
 
-# Your other routes here...
+# DNS lookup endpoint
+@app.route('/dns-lookup')
+def dns_lookup():
+    domain = request.args.get('domain')
+    if not domain:
+        return jsonify({'error': 'Domain parameter is required'}), 400
+    try:
+        # Your DNS lookup logic here
+        return jsonify({
+            'ip': '1.1.1.1',  # Replace with actual DNS lookup
+            'records': {
+                'A': ['1.1.1.1'],
+                'AAAA': ['2606:4700:4700::1111']
+            }
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Network info endpoint
+@app.route('/network-info')
+def network_info():
+    return jsonify({
+        'publicIp': request.remote_addr,
+        'isp': 'Unknown',
+        'location': 'Unknown',
+        'latency': 0
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
