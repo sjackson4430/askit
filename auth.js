@@ -6,7 +6,7 @@ class AuthManager {
     }
 
     init() {
-        const isLoginPage = window.location.pathname.includes('login.html');
+        const isLoginPage = window.location.pathname.includes('/login.html');
         const user = localStorage.getItem('user');
         
         if (user) {
@@ -14,11 +14,11 @@ class AuthManager {
             this.isAuthenticated = true;
             
             if (isLoginPage) {
-                window.location.href = 'index.html';
+                window.location.href = '/askit/index.html';
             }
         } else {
             if (!isLoginPage) {
-                window.location.href = 'login.html';
+                window.location.href = '/askit/login.html';
                 return;
             }
         }
@@ -95,7 +95,7 @@ class AuthManager {
         localStorage.setItem('user', JSON.stringify(user));
         this.currentUser = user;
         this.isAuthenticated = true;
-        window.location.href = '/index.html';
+        window.location.href = '/askit/index.html';
     }
 
     handleLogin() {
@@ -108,7 +108,7 @@ class AuthManager {
             if (user.email === email) {
                 this.currentUser = user;
                 this.isAuthenticated = true;
-                window.location.href = '/index.html';
+                window.location.href = '/askit/index.html';
             } else {
                 alert('Invalid credentials!');
             }
@@ -131,7 +131,7 @@ class AuthManager {
             localStorage.setItem('user', JSON.stringify(user));
             this.currentUser = user;
             this.isAuthenticated = true;
-            window.location.href = '/index.html';
+            window.location.href = '/askit/index.html';
         } catch (error) {
             console.error('Google sign-in error:', error);
             alert('Google sign-in failed. Please try again.');
@@ -142,7 +142,7 @@ class AuthManager {
         localStorage.removeItem('user');
         this.currentUser = null;
         this.isAuthenticated = false;
-        window.location.href = '/login.html';
+        window.location.href = '/askit/login.html';
     }
 }
 
