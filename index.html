@@ -7,8 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/askit/style.css">
-    <link rel="icon" type="image/x-icon" href="/askit/favicon.ico">
-    <link rel="shortcut icon" type="image/x-icon" href="/askit/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
     <nav class="navbar">
@@ -24,7 +24,6 @@
             </div>
         </div>
     </nav>
-    <div id="backend-status" class="backend-status"></div>
     <section class="hero parallax">
         <h1>Welcome to AI Computer Help</h1>
         <p>Your 24/7 Technical Assistant</p>
@@ -58,34 +57,16 @@
                 <div class="tools-grid">
                     <div class="tool-item">
                         <h3>Network Speed Test</h3>
-                        <button id="speedTestBtn" class="tool-btn" type="button">Run Test</button>
+                        <button id="speedTestBtn" class="tool-btn">Run Test</button>
                         <div id="speedResult"></div>
                     </div>
                     <div class="tool-item">
-                        <h3>DNS Lookup</h3>
-                        <div class="dns-tool">
-                            <input type="text" id="dnsInput" placeholder="Enter domain name">
-                            <button id="dnsLookupBtn" class="tool-btn">Lookup</button>
-                            <div id="dnsResult"></div>
-                        </div>
+                        <h3>Memory Usage</h3>
+                        <div id="memoryUsage"></div>
                     </div>
                     <div class="tool-item">
-                        <h3>Ping Test</h3>
-                        <div class="ping-tool">
-                            <input type="text" id="pingInput" placeholder="Enter hostname or IP">
-                            <button id="pingTestBtn" class="tool-btn">Start Ping</button>
-                            <div id="pingResult"></div>
-                        </div>
-                    </div>
-                    <div class="tool-item">
-                        <h3>System Information</h3>
-                        <button id="sysInfoBtn" class="tool-btn">Check System</button>
-                        <div id="sysInfoResult"></div>
-                    </div>
-                    <div class="tool-item">
-                        <h3>Network Information</h3>
-                        <button id="netInfoBtn" class="tool-btn">Check Network</button>
-                        <div id="netInfoResult"></div>
+                        <h3>CPU Load</h3>
+                        <div id="cpuLoad"></div>
                     </div>
                 </div>
             </div>

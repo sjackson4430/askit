@@ -6,7 +6,7 @@ class AuthManager {
     }
 
     init() {
-        const isLoginPage = window.location.pathname.includes('/login.html');
+        const isLoginPage = window.location.pathname.includes('/askit/login.html');
         const user = localStorage.getItem('user');
         
         if (user) {
@@ -145,11 +145,5 @@ class AuthManager {
         window.location.href = '/askit/login.html';
     }
 }
-404
-
-There isn't a GitHub Pages site here.
-
-If you're trying to publish one, read the full documentation to learn how to set up GitHub Pages for your repository, organization, or user account.
-GitHub Status — @githubstatus
 
 const auth = new AuthManager();
