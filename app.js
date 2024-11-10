@@ -511,7 +511,6 @@ function initDNSLookup() {
                 </div>
             `;
         } catch (error) {
-            console.error('DNS lookup error:', error);
             dnsResult.innerHTML = `<div class="error">${error.message}</div>`;
         } finally {
             dnsBtn.disabled = false;

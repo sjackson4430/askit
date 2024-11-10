@@ -61,6 +61,28 @@
                         <div id="speedResult"></div>
                     </div>
                     <div class="tool-item">
+                        <h3>DNS Lookup</h3>
+                        <input type="text" id="dnsInput" placeholder="Enter domain (e.g., google.com)">
+                        <button id="dnsLookupBtn" class="tool-btn">Lookup</button>
+                        <div id="dnsResult"></div>
+                    </div>
+                    <div class="tool-item">
+                        <h3>Ping Test</h3>
+                        <input type="text" id="pingInput" placeholder="Enter hostname or IP">
+                        <button id="pingTestBtn" class="tool-btn">Run Ping</button>
+                        <div id="pingResult"></div>
+                    </div>
+                    <div class="tool-item">
+                        <h3>System Information</h3>
+                        <button id="sysInfoBtn" class="tool-btn">Check System</button>
+                        <div id="sysInfoResult"></div>
+                    </div>
+                    <div class="tool-item">
+                        <h3>Network Information</h3>
+                        <button id="netInfoBtn" class="tool-btn">Check Network</button>
+                        <div id="netInfoResult"></div>
+                    </div>
+                    <div class="tool-item">
                         <h3>Memory Usage</h3>
                         <div id="memoryUsage"></div>
                     </div>
@@ -68,6 +90,7 @@
                         <h3>CPU Load</h3>
                         <div id="cpuLoad"></div>
                     </div>
+                    <div id="backend-status"></div>
                 </div>
             </div>
             <div class="feature-content hidden" id="security-section">
