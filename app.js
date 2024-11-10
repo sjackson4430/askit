@@ -323,7 +323,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function initSpeedTest() {
     const speedTestBtn = document.getElementById('speedTestBtn');
     const speedResult = document.getElementById('speedResult');
-    const speedGauge = document.getElementById('speedGauge');
 
     if (!speedTestBtn || !speedResult) return;
 
@@ -332,6 +331,7 @@ function initSpeedTest() {
         speedTestBtn.textContent = 'Testing...';
         
         try {
+            // Initialize test UI
             speedResult.innerHTML = `
                 <div class="speed-gauge">
                     <div class="gauge-value">0</div>
@@ -344,7 +344,7 @@ function initSpeedTest() {
                     <div class="progress-bar">
                         <div class="progress-fill"></div>
                     </div>
-                    <div class="progress-label">Testing... (0%)</div>
+                    <div class="progress-label">Preparing test...</div>
                 </div>
             `;
 
@@ -353,56 +353,69 @@ function initSpeedTest() {
             const progressFill = speedResult.querySelector('.progress-fill');
             const progressLabel = speedResult.querySelector('.progress-label');
 
-            // Larger test files
+            // Larger test files with weighted importance
             const testSizes = [
-                { size: 'small', weight: 1 },    // 1MB
-                { size: 'medium', weight: 2 },   // 5MB
-                { size: 'large', weight: 3 },    // 10MB
-                { size: 'xlarge', weight: 4 }    // 20MB
+                { size: 'small', weight: 1, bytes: 1024 * 1024 },      // 1MB
+                { size: 'medium', weight: 2, bytes: 5 * 1024 * 1024 }, // 5MB
+                { size: 'large', weight: 3, bytes: 10 * 1024 * 1024 }, // 10MB
+                { size: 'xlarge', weight: 4, bytes: 20 * 1024 * 1024 } // 20MB
             ];
 
             let totalSpeed = 0;
             let totalWeight = 0;
+            let maxSpeed = 0;
 
             for (let i = 0; i < testSizes.length; i++) {
-                const { size, weight } = testSizes[i];
+                const { size, weight, bytes } = testSizes[i];
                 const progress = ((i / testSizes.length) * 100).toFixed(0);
                 progressFill.style.width = `${progress}%`;
-                progressLabel.textContent = `Testing... (${progress}%)`;
+                progressLabel.textContent = `Testing ${size} file... (${progress}%)`;
 
-                const startTime = performance.now();
-                const response = await fetch(`/speed-test-file/${size}?t=${Date.now()}`, {
-                    cache: 'no-store'
-                });
-                const blob = await response.blob();
-                const endTime = performance.now();
+                // Perform multiple samples for each size
+                const samples = 3;
+                let sizeSpeed = 0;
 
-                const fileSizeInBits = blob.size * 8;
-                const durationInSeconds = (endTime - startTime) / 1000;
-                const speedMbps = (fileSizeInBits / durationInSeconds / 1024 / 1024) * weight;
+                for (let j = 0; j < samples; j++) {
+                    const startTime = performance.now();
+                    const response = await fetch(`/speed-test-file/${size}?t=${Date.now()}`, {
+                        cache: 'no-store'
+                    });
+                    const blob = await response.blob();
+                    const endTime = performance.now();
 
-                totalSpeed += speedMbps;
+                    const fileSizeInBits = blob.size * 8;
+                    const durationInSeconds = (endTime - startTime) / 1000;
+                    const speedMbps = (fileSizeInBits / durationInSeconds / 1024 / 1024);
+                    
+                    sizeSpeed += speedMbps;
+                    maxSpeed = Math.max(maxSpeed, speedMbps);
+                }
+
+                const avgSpeedForSize = (sizeSpeed / samples) * weight;
+                totalSpeed += avgSpeedForSize;
                 totalWeight += weight;
 
                 const currentAvg = (totalSpeed / totalWeight).toFixed(2);
                 gaugeValue.textContent = currentAvg;
-                meterFill.style.width = `${Math.min((currentAvg / 500) * 100, 100)}%`;
+                meterFill.style.width = `${Math.min((currentAvg / maxSpeed) * 100, 100)}%`;
             }
 
             const finalSpeed = (totalSpeed / totalWeight).toFixed(2);
             
+            // Final results display
             speedResult.innerHTML = `
                 <div class="speed-results">
                     <div class="speed-gauge final">
                         <div class="gauge-value">${finalSpeed}</div>
                         <div class="gauge-label">Mbps</div>
                         <div class="gauge-meter">
-                            <div class="meter-fill" style="width: ${Math.min((finalSpeed / 500) * 100, 100)}%"></div>
+                            <div class="meter-fill" style="width: ${Math.min((finalSpeed / maxSpeed) * 100, 100)}%"></div>
                         </div>
                     </div>
                     <div class="speed-details">
-                        <p>Download Speed: <strong>${finalSpeed} Mbps</strong></p>
-                        <p>Tests Completed: <strong>${testSizes.length}</strong></p>
+                        <p>Average Download Speed: <strong>${finalSpeed} Mbps</strong></p>
+                        <p>Peak Speed: <strong>${maxSpeed.toFixed(2)} Mbps</strong></p>
+                        <p>Tests Completed: <strong>${testSizes.length * 3}</strong></p>
                         <p>Quality: <strong>${getSpeedQuality(finalSpeed)}</strong></p>
                     </div>
                 </div>
