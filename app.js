@@ -323,39 +323,55 @@ document.addEventListener('DOMContentLoaded', () => {
 function initSpeedTest() {
     const speedTestBtn = document.getElementById('speedTestBtn');
     const speedResult = document.getElementById('speedResult');
+    const speedGauge = document.getElementById('speedGauge');
 
-    if (!speedTestBtn || !speedResult) {
-        console.error('Speed test elements not found');
-        return;
-    }
+    if (!speedTestBtn || !speedResult) return;
 
     speedTestBtn.onclick = async function() {
-        console.log('Speed test started');
         speedTestBtn.disabled = true;
         speedTestBtn.textContent = 'Testing...';
         
         try {
             speedResult.innerHTML = `
-                <div class="loading">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
+                <div class="speed-gauge">
+                    <div class="gauge-value">0</div>
+                    <div class="gauge-label">Mbps</div>
+                    <div class="gauge-meter">
+                        <div class="meter-fill"></div>
+                    </div>
+                </div>
+                <div class="test-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="progress-label">Testing... (0%)</div>
                 </div>
             `;
 
-            // Test files from our backend
-            const testFiles = [
-                '/speed-test-file/small',
-                '/speed-test-file/medium',
-                '/speed-test-file/large'
+            const gaugeValue = speedResult.querySelector('.gauge-value');
+            const meterFill = speedResult.querySelector('.meter-fill');
+            const progressFill = speedResult.querySelector('.progress-fill');
+            const progressLabel = speedResult.querySelector('.progress-label');
+
+            // Larger test files
+            const testSizes = [
+                { size: 'small', weight: 1 },    // 1MB
+                { size: 'medium', weight: 2 },   // 5MB
+                { size: 'large', weight: 3 },    // 10MB
+                { size: 'xlarge', weight: 4 }    // 20MB
             ];
 
             let totalSpeed = 0;
-            let completedTests = 0;
+            let totalWeight = 0;
 
-            for (const fileUrl of testFiles) {
+            for (let i = 0; i < testSizes.length; i++) {
+                const { size, weight } = testSizes[i];
+                const progress = ((i / testSizes.length) * 100).toFixed(0);
+                progressFill.style.width = `${progress}%`;
+                progressLabel.textContent = `Testing... (${progress}%)`;
+
                 const startTime = performance.now();
-                const response = await fetch(fileUrl + '?t=' + new Date().getTime(), {
+                const response = await fetch(`/speed-test-file/${size}?t=${Date.now()}`, {
                     cache: 'no-store'
                 });
                 const blob = await response.blob();
@@ -363,23 +379,34 @@ function initSpeedTest() {
 
                 const fileSizeInBits = blob.size * 8;
                 const durationInSeconds = (endTime - startTime) / 1000;
-                const speedMbps = (fileSizeInBits / durationInSeconds / 1024 / 1024);
-                
-                totalSpeed += speedMbps;
-                completedTests++;
+                const speedMbps = (fileSizeInBits / durationInSeconds / 1024 / 1024) * weight;
 
-                console.log(`Test ${completedTests}: ${speedMbps.toFixed(2)} Mbps`);
+                totalSpeed += speedMbps;
+                totalWeight += weight;
+
+                const currentAvg = (totalSpeed / totalWeight).toFixed(2);
+                gaugeValue.textContent = currentAvg;
+                meterFill.style.width = `${Math.min((currentAvg / 500) * 100, 100)}%`;
             }
 
-            const averageSpeed = totalSpeed / completedTests;
-
+            const finalSpeed = (totalSpeed / totalWeight).toFixed(2);
+            
             speedResult.innerHTML = `
                 <div class="speed-results">
-                    <p>Average Download Speed: <strong>${averageSpeed.toFixed(2)} Mbps</strong></p>
-                    <p>Tests Completed: <strong>${completedTests}</strong></p>
+                    <div class="speed-gauge final">
+                        <div class="gauge-value">${finalSpeed}</div>
+                        <div class="gauge-label">Mbps</div>
+                        <div class="gauge-meter">
+                            <div class="meter-fill" style="width: ${Math.min((finalSpeed / 500) * 100, 100)}%"></div>
+                        </div>
+                    </div>
+                    <div class="speed-details">
+                        <p>Download Speed: <strong>${finalSpeed} Mbps</strong></p>
+                        <p>Tests Completed: <strong>${testSizes.length}</strong></p>
+                        <p>Quality: <strong>${getSpeedQuality(finalSpeed)}</strong></p>
+                    </div>
                 </div>
             `;
-
         } catch (error) {
             console.error('Speed test error:', error);
             speedResult.innerHTML = `
@@ -393,4 +420,12 @@ function initSpeedTest() {
             speedTestBtn.textContent = 'Run Test';
         }
     };
+}
+
+function getSpeedQuality(speed) {
+    if (speed >= 100) return 'Excellent';
+    if (speed >= 50) return 'Very Good';
+    if (speed >= 25) return 'Good';
+    if (speed >= 10) return 'Fair';
+    return 'Poor';
 }

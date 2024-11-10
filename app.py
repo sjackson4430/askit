@@ -108,13 +108,14 @@ def server_error(e):
 def speed_test_file(size):
     """Generate test files of different sizes"""
     sizes = {
-        'small': 1024 * 100,  # 100KB
-        'medium': 1024 * 500,  # 500KB
-        'large': 1024 * 1000   # 1MB
+        'small': 1024 * 1024,      # 1MB
+        'medium': 1024 * 1024 * 5,  # 5MB
+        'large': 1024 * 1024 * 10,  # 10MB
+        'xlarge': 1024 * 1024 * 20  # 20MB
     }
     
     byte_size = sizes.get(size, sizes['small'])
-    test_data = b'0' * byte_size
+    test_data = os.urandom(byte_size)  # Use random data instead of zeros
     
     return send_file(
         BytesIO(test_data),

@@ -1,10 +1,15 @@
 /* Add these new root variables and styles at the beginning of your file */
 :root {
-  --primary-color: #00ff9d;
-  --background-color: #605858;
-  --text-color: #ffffff;
-  --accent-color: #145d07;
-  --error-color: #ff4444;
+  --primary-color: #4F46E5;      /* Indigo */
+  --secondary-color: #10B981;    /* Emerald */
+  --background-color: #1F2937;   /* Dark blue-gray */
+  --surface-color: #374151;      /* Lighter blue-gray */
+  --text-color: #F3F4F6;         /* Light gray */
+  --text-muted: #9CA3AF;         /* Muted text */
+  --accent-color: #8B5CF6;       /* Purple */
+  --error-color: #EF4444;        /* Red */
+  --success-color: #10B981;      /* Green */
+  --warning-color: #F59E0B;      /* Yellow */
 }
 
 /* Add this at the top of your style.css file */
@@ -311,4 +316,57 @@ h1 {
     padding: 1rem;
     border-radius: 4px;
     margin-top: 1rem;
+}
+
+/* Speed Test Styles */
+.speed-gauge {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.gauge-value {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.gauge-label {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.gauge-meter {
+    height: 8px;
+    background: var(--surface-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    transition: width 0.3s ease;
+}
+
+.test-progress {
+    margin: 2rem 0;
+}
+
+.progress-bar {
+    height: 4px;
+    background: var(--surface-color);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--secondary-color);
+    transition: width 0.3s ease;
+}
+
+.progress-label {
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    text-align: center;
 }
