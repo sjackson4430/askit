@@ -454,22 +454,45 @@ function initDNSLookup() {
     dnsBtn.onclick = async function() {
         try {
             dnsBtn.disabled = true;
-            dnsResult.innerHTML = '<div class="loading">Looking up DNS...</div>';
+            dnsResult.innerHTML = '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
             
             const domain = dnsInput.value.trim();
-            const response = await fetch(`/dns-lookup?domain=${encodeURIComponent(domain)}`);
-            const data = await response.json();
+            if (!domain) {
+                throw new Error('Please enter a domain name');
+            }
 
-            if (!response.ok) throw new Error(data.error || 'DNS lookup failed');
+            const response = await fetch(`/dns-lookup?domain=${encodeURIComponent(domain)}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
 
             dnsResult.innerHTML = `
                 <div class="dns-results">
-                    <p><strong>IP Address:</strong> ${data.ip}</p>
-                    ${data.records ? `<p><strong>DNS Records:</strong></p>
-                    <pre>${JSON.stringify(data.records, null, 2)}</pre>` : ''}
+                    <div class="info-group">
+                        <h4>IP Address</h4>
+                        <p>${data.ip}</p>
+                    </div>
+                    ${Object.entries(data.records || {}).map(([type, records]) => `
+                        <div class="info-group">
+                            <h4>${type} Records</h4>
+                            ${records.map(record => `<p>${record}</p>`).join('')}
+                        </div>
+                    `).join('')}
                 </div>
             `;
         } catch (error) {
+            console.error('DNS lookup error:', error);
             dnsResult.innerHTML = `<div class="error">${error.message}</div>`;
         } finally {
             dnsBtn.disabled = false;

@@ -136,16 +136,31 @@ def dns_lookup():
         return jsonify({'error': 'Domain name is required'}), 400
 
     try:
+        # Basic validation
+        if not isinstance(domain, str) or len(domain) > 255:
+            return jsonify({'error': 'Invalid domain name'}), 400
+
         # Get IP address
-        ip = socket.gethostbyname(domain)
-        
+        try:
+            ip = socket.gethostbyname(domain)
+        except socket.gaierror as e:
+            return jsonify({'error': f'Could not resolve domain: {str(e)}'}), 400
+
         # Get DNS records
         records = {}
+        resolver = dns.resolver.Resolver()
+        resolver.timeout = 2
+        resolver.lifetime = 2
+
         for record_type in ['A', 'AAAA', 'MX', 'NS', 'TXT']:
             try:
-                answers = dns.resolver.resolve(domain, record_type)
+                answers = resolver.resolve(domain, record_type)
                 records[record_type] = [str(rdata) for rdata in answers]
-            except Exception:
+            except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN, 
+                    dns.resolver.NoNameservers, dns.exception.Timeout):
+                continue
+            except Exception as e:
+                logging.error(f"Error getting {record_type} records for {domain}: {str(e)}")
                 continue
 
         return jsonify({
@@ -153,7 +168,8 @@ def dns_lookup():
             'records': records
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        logging.error(f"DNS lookup error for {domain}: {str(e)}")
+        return jsonify({'error': f'DNS lookup failed: {str(e)}'}), 400
 
 @app.route('/ping')
 def ping_host():
