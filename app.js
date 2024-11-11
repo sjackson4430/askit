@@ -1,6 +1,6 @@
 // Constants for API endpoints
-const TOOLS_BACKEND = 'https://network-tools-backend.onrender.com';
-const AI_BACKEND = 'https://askitbackend-production.up.railway.app';
+const TOOLS_BACKEND = 'https://network-tools-backend.onrender.com/api';
+const AI_BACKEND = 'https://askitbackend-production.up.railway.app/api';
 
 // Helper function to check if backends are available
 async function checkBackendConnections() {
@@ -49,16 +49,27 @@ function initNetworkTools() {
                 }
                 
                 displayLoading('dnsResult');
-                const response = await fetch(`${TOOLS_BACKEND}/dns-lookup?domain=${encodeURIComponent(domain)}`);
-                const data = await response.json();
+                const response = await fetch(`${TOOLS_BACKEND}/dns?domain=${encodeURIComponent(domain)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 
                 if (!response.ok) {
-                    throw new Error(data.message || 'DNS lookup failed');
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
                 }
                 
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Invalid response format from server');
+                }
+                
+                const data = await response.json();
                 displayResult('dnsResult', data);
             } catch (error) {
-                displayError('dnsResult', error.message);
+                console.error('DNS Lookup error:', error);
+                displayError('dnsResult', `DNS lookup failed: ${error.message}`);
             }
         });
     }
@@ -76,16 +87,27 @@ function initNetworkTools() {
                 }
                 
                 displayLoading('pingResult');
-                const response = await fetch(`${TOOLS_BACKEND}/ping?host=${encodeURIComponent(host)}`);
-                const data = await response.json();
+                const response = await fetch(`${TOOLS_BACKEND}/ping?host=${encodeURIComponent(host)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Ping test failed');
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
                 }
                 
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Invalid response format from server');
+                }
+                
+                const data = await response.json();
                 displayResult('pingResult', data);
             } catch (error) {
-                displayError('pingResult', error.message);
+                console.error('Ping error:', error);
+                displayError('pingResult', `Ping test failed: ${error.message}`);
             }
         });
     }
@@ -182,9 +204,24 @@ function displayLoading(elementId) {
 function displayResult(elementId, data) {
     const element = document.getElementById(elementId);
     if (element) {
+        let formattedContent = '';
+        
+        if (typeof data === 'object') {
+            // Format object data
+            Object.entries(data).forEach(([key, value]) => {
+                formattedContent += `<div class="result-item">
+                    <strong>${key}:</strong> 
+                    <span>${Array.isArray(value) ? value.join(', ') : value}</span>
+                </div>`;
+            });
+        } else {
+            // Handle simple string/number results
+            formattedContent = `<div class="result-item">${data}</div>`;
+        }
+        
         element.innerHTML = `
             <div class="result-container">
-                <pre>${JSON.stringify(data, null, 2)}</pre>
+                ${formattedContent}
             </div>
         `;
     }
