@@ -1,6 +1,6 @@
 // Define separate backend URLs
 const AI_BACKEND = 'https://askitbackend-production.up.railway.app';  // Node.js server
-const TOOLS_BACKEND = 'https://network-tools-backend-production.up.railway.app';  // Python server
+const TOOLS_BACKEND = 'https://network-tools-backend.onrender.com';  // Python server
 
 // Separate fetch functions for each backend
 async function fetchAIAPI(endpoint, options = {}) {
