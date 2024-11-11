@@ -76,13 +76,82 @@ function displayResult(elementId, data) {
 
 function displayError(elementId, message) {
     const element = document.getElementById(elementId);
-    if (!element) return;
-    
-    element.innerHTML = `
-        <div class="error-container">
-            <p class="error-message">${message}</p>
-        </div>
-    `;
+    if (element) {
+        element.innerHTML = `
+            <div class="error-container">
+                <p class="error-message">${message}</p>
+            </div>
+        `;
+    }
 }
 
-// Add these styles for better result display
+function displayLoading(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.innerHTML = `
+            <div class="loading-container">
+                <div class="loading-indicator"></div>
+                <p>Loading...</p>
+            </div>
+        `;
+    }
+}
+
+// Add this function to initialize feature tabs
+function initFeatureTabs() {
+    const featureBtns = document.querySelectorAll('.feature-btn');
+    const featureContents = document.querySelectorAll('.feature-content');
+    
+    console.log('Initializing feature tabs...'); // Debug log
+    
+    featureBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const feature = btn.dataset.feature;
+            console.log('Feature clicked:', feature); // Debug log
+            
+            // Remove active class from all buttons and add to clicked button
+            featureBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Hide all content sections and show the selected one
+            featureContents.forEach(content => content.classList.add('hidden'));
+            const selectedContent = document.getElementById(`${feature}-section`);
+            if (selectedContent) {
+                selectedContent.classList.remove('hidden');
+            }
+        });
+    });
+}
+
+// Update your initTools function
+async function initTools() {
+    try {
+        console.log('Initializing tools...'); // Debug log
+        
+        // Initialize feature tabs first
+        initFeatureTabs();
+        
+        // Check backend connections
+        const backendsAvailable = await checkBackendConnections();
+        updateBackendStatus(backendsAvailable);
+
+        if (backendsAvailable) {
+            console.log('Backends available, initializing network tools...'); // Debug log
+            initNetworkTools();
+        } else {
+            console.error('Backend connection failed');
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.disabled = true;
+                btn.title = 'Service temporarily unavailable';
+            });
+        }
+    } catch (error) {
+        console.error('Error initializing tools:', error);
+    }
+}
+
+// Make sure this is at the bottom of your file
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing...'); // Debug log
+    initTools();
+});
