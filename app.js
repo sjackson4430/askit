@@ -1,74 +1,64 @@
-// Add these constants at the top of your file
+// Constants for API endpoints
 const TOOLS_BACKEND = 'https://network-tools-backend.onrender.com';
-const AI_BACKEND = 'https://askitbackend-production.up.railway.app/';
+const AI_BACKEND = 'https://askitbackend-production.up.railway.app';
 
-// Add these fetch helper functions
-async function fetchToolsAPI(endpoint) {
+// Helper function to check if backends are available
+async function checkBackendConnections() {
     try {
-        const response = await fetch(`${TOOLS_BACKEND}${endpoint}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
+        const toolsResponse = await fetch(`${TOOLS_BACKEND}/health`);
+        const aiResponse = await fetch(`${AI_BACKEND}/health`);
+        return toolsResponse.ok && aiResponse.ok;
     } catch (error) {
-        console.error('Tools API Error:', error);
-        throw new Error('Failed to fetch from tools API');
+        console.error('Backend check failed:', error);
+        return false;
     }
 }
 
-async function fetchAIAPI(endpoint) {
-    try {
-        const response = await fetch(`${AI_BACKEND}${endpoint}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('AI API Error:', error);
-        throw new Error('Failed to fetch from AI API');
-    }
+// Initialize all features
+function initFeatures() {
+    const featureBtns = document.querySelectorAll('.feature-btn');
+    featureBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const feature = btn.dataset.feature;
+            
+            // Update active button
+            featureBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Show selected content
+            document.querySelectorAll('.feature-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${feature}-section`).classList.remove('hidden');
+        });
+    });
 }
 
-// Add IP address loading function
-async function loadIPAddress() {
-    try {
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        const ipElement = document.getElementById('ip-address');
-        if (ipElement) {
-            ipElement.textContent = `IP: ${data.ip}`;
-        }
-    } catch (error) {
-        console.error('Error loading IP:', error);
-        const ipElement = document.getElementById('ip-address');
-        if (ipElement) {
-            ipElement.textContent = 'IP: Not available';
-        }
-    }
-}
-
-// Update the initNetworkTools function
+// Initialize network tools
 function initNetworkTools() {
-    console.log('Initializing network tools...');
-    
     // DNS Lookup
     const dnsBtn = document.getElementById('dnsLookupBtn');
     const dnsInput = document.getElementById('dnsInput');
+    
     if (dnsBtn && dnsInput) {
         dnsBtn.addEventListener('click', async () => {
             try {
                 const domain = dnsInput.value.trim();
-                if (!domain) throw new Error('Please enter a domain');
+                if (!domain) {
+                    throw new Error('Please enter a domain');
+                }
                 
                 displayLoading('dnsResult');
-                dnsBtn.disabled = true;
+                const response = await fetch(`${TOOLS_BACKEND}/dns-lookup?domain=${encodeURIComponent(domain)}`);
+                const data = await response.json();
                 
-                const result = await fetchToolsAPI(`/dns-lookup?domain=${encodeURIComponent(domain)}`);
-                displayResult('dnsResult', result);
+                if (!response.ok) {
+                    throw new Error(data.message || 'DNS lookup failed');
+                }
+                
+                displayResult('dnsResult', data);
             } catch (error) {
                 displayError('dnsResult', error.message);
-            } finally {
-                dnsBtn.disabled = false;
             }
         });
     }
@@ -76,59 +66,107 @@ function initNetworkTools() {
     // Ping Test
     const pingBtn = document.getElementById('pingTestBtn');
     const pingInput = document.getElementById('pingInput');
+    
     if (pingBtn && pingInput) {
         pingBtn.addEventListener('click', async () => {
             try {
                 const host = pingInput.value.trim();
-                if (!host) throw new Error('Please enter a hostname or IP');
+                if (!host) {
+                    throw new Error('Please enter a hostname or IP');
+                }
                 
                 displayLoading('pingResult');
-                pingBtn.disabled = true;
+                const response = await fetch(`${TOOLS_BACKEND}/ping?host=${encodeURIComponent(host)}`);
+                const data = await response.json();
                 
-                const result = await fetchToolsAPI(`/ping?host=${encodeURIComponent(host)}`);
-                displayResult('pingResult', result);
+                if (!response.ok) {
+                    throw new Error(data.message || 'Ping test failed');
+                }
+                
+                displayResult('pingResult', data);
             } catch (error) {
                 displayError('pingResult', error.message);
-            } finally {
-                pingBtn.disabled = false;
             }
         });
     }
 
-    // Add similar loading states for other tools...
-}
+    // System Info
+    const sysInfoBtn = document.getElementById('sysInfoBtn');
+    if (sysInfoBtn) {
+        sysInfoBtn.addEventListener('click', async () => {
+            try {
+                displayLoading('sysInfoResult');
+                const response = await fetch(`${TOOLS_BACKEND}/system-info`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to get system info');
+                }
+                
+                displayResult('sysInfoResult', data);
+            } catch (error) {
+                displayError('sysInfoResult', error.message);
+            }
+        });
+    }
 
-// Update the initTools function
-async function initTools() {
-    try {
-        console.log('Initializing tools...');
-        
-        // Load IP address
-        loadIPAddress();
-        
-        // Initialize feature tabs
-        initFeatureTabs();
-        
-        // Initialize network tools
-        initNetworkTools();
-        
-        // Update user info if authenticated
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user) {
-            const userEmail = document.getElementById('userEmail');
-            const userAvatar = document.getElementById('userAvatar');
-            const userInfo = document.querySelector('.user-info');
-            
-            if (userEmail) userEmail.textContent = user.email;
-            if (userAvatar && user.picture) userAvatar.src = user.picture;
-            if (userInfo) userInfo.style.display = 'flex';
-        }
-    } catch (error) {
-        console.error('Error initializing tools:', error);
+    // Network Info
+    const netInfoBtn = document.getElementById('netInfoBtn');
+    if (netInfoBtn) {
+        netInfoBtn.addEventListener('click', async () => {
+            try {
+                displayLoading('netInfoResult');
+                const response = await fetch(`${TOOLS_BACKEND}/network-info`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to get network info');
+                }
+                
+                displayResult('netInfoResult', data);
+            } catch (error) {
+                displayError('netInfoResult', error.message);
+            }
+        });
     }
 }
 
-// Add these helper functions for better UI feedback
+// Initialize AI Chat
+function initAIChat() {
+    const askButton = document.getElementById('askButton');
+    const questionInput = document.getElementById('question');
+    
+    if (askButton && questionInput) {
+        askButton.addEventListener('click', async () => {
+            try {
+                const question = questionInput.value.trim();
+                if (!question) {
+                    throw new Error('Please enter a question');
+                }
+                
+                displayLoading('response');
+                const response = await fetch(`${AI_BACKEND}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question })
+                });
+                
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to get AI response');
+                }
+                
+                displayResult('response', data);
+            } catch (error) {
+                displayError('response', error.message);
+            }
+        });
+    }
+}
+
+// Helper functions for UI
 function displayLoading(elementId) {
     const element = document.getElementById(elementId);
     if (element) {
@@ -163,5 +201,29 @@ function displayError(elementId, message) {
     }
 }
 
-// Initialize everything when the DOM is loaded
-document.addEventListener('DOMContentLoaded', initTools);
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Load IP address
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        document.getElementById('ip-address').textContent = `IP: ${ipData.ip}`;
+        
+        // Initialize all features
+        initFeatures();
+        initNetworkTools();
+        initAIChat();
+        
+        // Check backend status
+        const backendsAvailable = await checkBackendConnections();
+        if (!backendsAvailable) {
+            document.getElementById('backend-status').innerHTML = `
+                <div class="error-container">
+                    <p class="error-message">Some services are currently unavailable</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Initialization error:', error);
+    }
+});
