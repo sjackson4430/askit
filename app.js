@@ -52,43 +52,57 @@ function initFeatures() {
     });
 }
 
-// Initialize network tools
+// Initialize network tools with improved error handling and validation
 function initNetworkTools() {
     // DNS Lookup
     const dnsBtn = document.getElementById('dnsLookupBtn');
     const dnsInput = document.getElementById('dnsInput');
     
     if (dnsBtn && dnsInput) {
-        dnsBtn.addEventListener('click', async () => {
+        const handleDnsLookup = debounce(async () => {
+            const domain = dnsInput.value.trim();
+            if (!domain) {
+                displayError('dnsResult', 'Please enter a domain');
+                return;
+            }
+            
+            if (!validateDomain(domain)) {
+                displayError('dnsResult', 'Invalid domain format');
+                return;
+            }
+            
+            dnsBtn.disabled = true;
             try {
-                const domain = dnsInput.value.trim();
-                if (!domain) {
-                    throw new Error('Please enter a domain');
-                }
-                
                 displayLoading('dnsResult');
-                const response = await fetch(`${TOOLS_BACKEND}/tools/dns`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'Origin': window.location.origin
-                    },
-                    body: JSON.stringify({ domain })
-                });
+                const response = await fetchWithTimeout(
+                    `${TOOLS_BACKEND}/tools/dns`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'Origin': window.location.origin
+                        },
+                        body: JSON.stringify({ domain })
+                    }
+                );
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText || `Server returned ${response.status}`);
+                    throw new Error(await response.text() || `Server returned ${response.status}`);
                 }
                 
                 const data = await response.json();
-                displayResult('dnsResult', data);
+                const formattedResult = formatDNSResults(data);
+                displayResult('dnsResult', formattedResult);
             } catch (error) {
                 console.error('DNS Lookup error:', error);
                 displayError('dnsResult', error.message);
+            } finally {
+                dnsBtn.disabled = false;
             }
-        });
+        }, 300);
+        
+        dnsBtn.addEventListener('click', handleDnsLookup);
     }
 
     // Ping Test
@@ -211,33 +225,18 @@ function displayLoading(elementId) {
         element.innerHTML = `
             <div class="loading-container">
                 <div class="loading-indicator"></div>
-                <p>Loading...</p>
+                <span>Loading...</span>
             </div>
         `;
     }
 }
 
-function displayResult(elementId, data) {
+function displayResult(elementId, content) {
     const element = document.getElementById(elementId);
     if (element) {
-        let formattedContent = '';
-        
-        if (typeof data === 'object') {
-            // Format object data
-            Object.entries(data).forEach(([key, value]) => {
-                formattedContent += `<div class="result-item">
-                    <strong>${key}:</strong> 
-                    <span>${Array.isArray(value) ? value.join(', ') : value}</span>
-                </div>`;
-            });
-        } else {
-            // Handle simple string/number results
-            formattedContent = `<div class="result-item">${data}</div>`;
-        }
-        
         element.innerHTML = `
             <div class="result-container">
-                ${formattedContent}
+                ${content}
             </div>
         `;
     }
@@ -248,10 +247,83 @@ function displayError(elementId, message) {
     if (element) {
         element.innerHTML = `
             <div class="error-container">
-                <p class="error-message">${message}</p>
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>${message}</span>
+                </div>
             </div>
         `;
     }
+}
+
+// Helper function to format DNS results
+function formatDNSResults(data) {
+    return `
+        <div class="dns-results">
+            <div class="info-group">
+                <h4>IP Addresses</h4>
+                ${data.ipAddresses?.map(ip => `<p>${ip}</p>`).join('') || '<p>No IP addresses found</p>'}
+            </div>
+            
+            ${data.mailServers?.length ? `
+                <div class="info-group">
+                    <h4>Mail Servers</h4>
+                    ${data.mailServers.map(mx => `
+                        <p>Priority: ${mx.priority} - ${mx.exchange}</p>
+                    `).join('')}
+                </div>
+            ` : ''}
+            
+            ${data.nameServers?.length ? `
+                <div class="info-group">
+                    <h4>Name Servers</h4>
+                    ${data.nameServers.map(ns => `<p>${ns}</p>`).join('')}
+                </div>
+            ` : ''}
+            
+            ${data.txtRecords?.length ? `
+                <div class="info-group">
+                    <h4>TXT Records</h4>
+                    ${data.txtRecords.map(txt => `<p>${txt}</p>`).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+// Add utility functions
+function validateDomain(domain) {
+    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+    return domainRegex.test(domain);
+}
+
+async function fetchWithTimeout(url, options, timeout = 5000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        throw error;
+    }
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 }
 
 // Initialize everything when DOM is loaded
