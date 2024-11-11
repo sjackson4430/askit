@@ -73,17 +73,18 @@ button:disabled {
     min-height: 100px;
 }
   
-.display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-            url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920');
-background-size: cover;
-background-attachment: fixed;
-color: var(--text-color);
-position: relative;
-z-index: 1;
+.display-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920');
+    background-size: cover;
+    background-attachment: fixed;
+    color: var(--text-color);
+    position: relative;
+    z-index: 1;
 }
   
 .features {

@@ -250,7 +250,7 @@ function initSystemInfo() {
                     <div class="info-group">
                         <h4>Browser Information</h4>
                         <p>Name: ${navigator.userAgent.split(') ')[0].split(' (')[0]}</p>
-                        <p>Platform: ${navigator.platform}</p>
+                        <p>Platform: ${navigator.userAgentData?.platform || navigator.platform}</p>
                         <p>Language: ${navigator.language}</p>
                         <p>Cookies Enabled: ${navigator.cookieEnabled ? 'Yes' : 'No'}</p>
                     </div>
