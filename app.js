@@ -1,23 +1,31 @@
-// Constants for API endpoints
-const TOOLS_BACKEND = 'https://network-tools-backend.onrender.com';
-const AI_BACKEND = 'https://askitbackend-production.up.railway.app';
+// Constants for API endpoints - update these to match your actual backend URLs
+const TOOLS_BACKEND = 'https://network-tools-backend.onrender.com/api/v1';
+const AI_BACKEND = 'https://askitbackend-production.up.railway.app/api/v1';
 
 // Helper function to check if backends are available
 async function checkBackendConnections() {
     try {
-        const toolsResponse = await fetch(`${TOOLS_BACKEND}/health-check`, {
+        const toolsResponse = await fetch(`${TOOLS_BACKEND}/health`, {
+            method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Origin': window.location.origin
             }
         });
-        const aiResponse = await fetch(`${AI_BACKEND}/health-check`, {
+        
+        const aiResponse = await fetch(`${AI_BACKEND}/health`, {
+            method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Origin': window.location.origin
             }
         });
-        return toolsResponse.ok && aiResponse.ok;
+
+        if (!toolsResponse.ok || !aiResponse.ok) {
+            return false;
+        }
+
+        return true;
     } catch (error) {
         console.error('Backend check failed:', error);
         return false;
@@ -59,16 +67,19 @@ function initNetworkTools() {
                 }
                 
                 displayLoading('dnsResult');
-                const response = await fetch(`${TOOLS_BACKEND}/dns-lookup/${encodeURIComponent(domain)}`, {
-                    method: 'GET',
+                const response = await fetch(`${TOOLS_BACKEND}/tools/dns`, {
+                    method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'Origin': window.location.origin
-                    }
+                    },
+                    body: JSON.stringify({ domain })
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Server returned ${response.status}: ${await response.text()}`);
+                    const errorText = await response.text();
+                    throw new Error(errorText || `Server returned ${response.status}`);
                 }
                 
                 const data = await response.json();
@@ -93,16 +104,19 @@ function initNetworkTools() {
                 }
                 
                 displayLoading('pingResult');
-                const response = await fetch(`${TOOLS_BACKEND}/ping/${encodeURIComponent(host)}`, {
-                    method: 'GET',
+                const response = await fetch(`${TOOLS_BACKEND}/tools/ping`, {
+                    method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'Origin': window.location.origin
-                    }
+                    },
+                    body: JSON.stringify({ host })
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Server returned ${response.status}: ${await response.text()}`);
+                    const errorText = await response.text();
+                    throw new Error(errorText || `Server returned ${response.status}`);
                 }
                 
                 const data = await response.json();
