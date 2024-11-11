@@ -26,8 +26,7 @@ class AuthManager {
         if (isLoginPage) {
             this.setupEventListeners();
             google.accounts.id.initialize({
-                client_id: '987753308656-d602k8jj7uilstego6d9vn61bfqpjh6h.apps.googleusercontent.com
-',
+                client_id: '987753308656-d602k8jj7uilstego6d9vn61bfqpjh6h.apps.googleusercontent.com',
                 callback: this.handleGoogleSignIn.bind(this)
             });
 

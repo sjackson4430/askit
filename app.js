@@ -100,8 +100,11 @@ async function checkBackendConnections() {
         const toolsHealth = await fetchToolsAPI('/health');
         console.log('Tools Backend health:', toolsHealth);
 
-        // Return true if both backends are healthy
-        return aiHealth.status === 'healthy' && toolsHealth.status === 'healthy';
+        // Return true if both backends are responding with ok/running status
+        return (
+            (aiHealth.status === 'ok' || aiHealth.status === 'running') && 
+            (toolsHealth.status === 'ok' || toolsHealth.status === 'running')
+        );
     } catch (error) {
         console.error('Backend connection check failed:', error);
         return false;
