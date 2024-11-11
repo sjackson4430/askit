@@ -1,12 +1,22 @@
 // Constants for API endpoints
-const TOOLS_BACKEND = 'https://network-tools-backend.onrender.com/api';
-const AI_BACKEND = 'https://askitbackend-production.up.railway.app/api';
+const TOOLS_BACKEND = 'https://network-tools-backend.onrender.com';
+const AI_BACKEND = 'https://askitbackend-production.up.railway.app';
 
 // Helper function to check if backends are available
 async function checkBackendConnections() {
     try {
-        const toolsResponse = await fetch(`${TOOLS_BACKEND}/health`);
-        const aiResponse = await fetch(`${AI_BACKEND}/health`);
+        const toolsResponse = await fetch(`${TOOLS_BACKEND}/health-check`, {
+            headers: {
+                'Accept': 'application/json',
+                'Origin': window.location.origin
+            }
+        });
+        const aiResponse = await fetch(`${AI_BACKEND}/health-check`, {
+            headers: {
+                'Accept': 'application/json',
+                'Origin': window.location.origin
+            }
+        });
         return toolsResponse.ok && aiResponse.ok;
     } catch (error) {
         console.error('Backend check failed:', error);
@@ -49,27 +59,23 @@ function initNetworkTools() {
                 }
                 
                 displayLoading('dnsResult');
-                const response = await fetch(`${TOOLS_BACKEND}/dns?domain=${encodeURIComponent(domain)}`, {
+                const response = await fetch(`${TOOLS_BACKEND}/dns-lookup/${encodeURIComponent(domain)}`, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Origin': window.location.origin
                     }
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-                }
-                
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Invalid response format from server');
+                    throw new Error(`Server returned ${response.status}: ${await response.text()}`);
                 }
                 
                 const data = await response.json();
                 displayResult('dnsResult', data);
             } catch (error) {
                 console.error('DNS Lookup error:', error);
-                displayError('dnsResult', `DNS lookup failed: ${error.message}`);
+                displayError('dnsResult', error.message);
             }
         });
     }
@@ -87,27 +93,23 @@ function initNetworkTools() {
                 }
                 
                 displayLoading('pingResult');
-                const response = await fetch(`${TOOLS_BACKEND}/ping?host=${encodeURIComponent(host)}`, {
+                const response = await fetch(`${TOOLS_BACKEND}/ping/${encodeURIComponent(host)}`, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Origin': window.location.origin
                     }
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-                }
-                
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Invalid response format from server');
+                    throw new Error(`Server returned ${response.status}: ${await response.text()}`);
                 }
                 
                 const data = await response.json();
                 displayResult('pingResult', data);
             } catch (error) {
                 console.error('Ping error:', error);
-                displayError('pingResult', `Ping test failed: ${error.message}`);
+                displayError('pingResult', error.message);
             }
         });
     }

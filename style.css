@@ -708,3 +708,22 @@ h1 {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* Fix Font Awesome loading */
+.fas {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+}
+
+/* Prevent FOUC (Flash of Unstyled Content) */
+.js-loading *,
+.js-loading *:before,
+.js-loading *:after {
+    animation-play-state: paused !important;
+}
