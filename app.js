@@ -1,6 +1,6 @@
 // Constants for API endpoints - update these to match your actual backend URLs
-const TOOLS_BACKEND = 'https://network-tools-backend.onrender.com/api/v1';
-const AI_BACKEND = 'https://askitbackend-production.up.railway.app/api/v1';
+const TOOLS_BACKEND = 'https://network-tools-backend.onrender.com';
+const AI_BACKEND = 'https://askitbackend-production.up.railway.app';
 
 // Helper function to check if backends are available
 async function checkBackendConnections() {
